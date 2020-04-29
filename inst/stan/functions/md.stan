@@ -60,7 +60,7 @@
     return(out);
   }
 
-  matrix lambda_mat(int[] J_f, int[,] F_ind, vector lambdaEst) {
+  matrix lambda_mat(int[] J_f, int[,] F_ind, row_vector lambdaEst) {
     int F_J[2] = dims(F_ind);  
     int F = F_J[1];
     int J = F_J[2];
