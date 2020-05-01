@@ -73,7 +73,6 @@ transformed parameters {
   matrix[K, J] nu_random = lambda_resid_nu_mean_logsd_random[, lamResNu_bounds[3,1]:lamResNu_bounds[3,2]];
   matrix[K, F] eta_mean = lambda_resid_nu_mean_logsd_random[, (lamResNu_bounds[3,2] + 1):(lamResNu_bounds[3,2] + F)];
   matrix[K, F] eta_sd = exp(lambda_resid_nu_mean_logsd_random[, (total_param + F + 1):(total_param + 2*F)]);
-  // Compute etas; pre-compute the eta covariances, and allow the eta_cor_nonmi option.
   matrix[2*F, 2*F] eta_cov_U[K];
   matrix[N, F] eta = eta_mean[group]; // Initialize to means; eta = 0 + mean + stoch. error
   row_vector[total_lambda] lambda_lowerbound = compute_lambda_lowerbounds(lambda_est_random);
