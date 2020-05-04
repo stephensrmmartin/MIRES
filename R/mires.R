@@ -48,7 +48,7 @@ mires <- function(formula, group, data, ...) {
 
     # Get relevant variable names
     factors <- .formula_names(formList)$factor
-    vars <- c(group_string, do.call(c, .formula_names(formList, terms = FALSE)$indicator))
+    vars <- c(group_string, unique(do.call(c, .formula_names(formList, terms = FALSE)$indicator)))
 
     # Reduce data to relevant vars
     data.sub <- data[,vars]
@@ -86,7 +86,8 @@ mires <- function(formula, group, data, ...) {
                  F = F,
                  K = K,
                  group = group,
-                 factors = do.call(c, factors))
+                 factors = do.call(c, factors),
+                 data = data.complete)
     stan_data <- list(N = N,
                       J = J,
                       F = F,
