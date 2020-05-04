@@ -87,6 +87,8 @@ mires <- function(formula, group, data, ...) {
                  K = K,
                  group = group,
                  factors = do.call(c, factors),
+                 indicators = colnames(mm),
+                 ind_spec = ind_spec,
                  data = data.complete)
     stan_data <- list(N = N,
                       J = J,
