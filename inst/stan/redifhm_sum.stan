@@ -1,6 +1,7 @@
 functions {
 #include /functions/common.stan
 #include /functions/sum_to_zero.stan
+#include /functions/ud.stan
   
 }
 
