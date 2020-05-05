@@ -17,9 +17,44 @@
 ##' @param data data.frame. Must contain the indicators specified in formula, and the grouping variable.
 ##' @param ... 
 ##' @return mires object.
+##' @import rstan
+##' @importFrom parallel detectCores
 ##' @author Stephen R. Martin
 mires <- function(formula, group, data, ...) {
-    
+    dots <- list(...)
+
+    d <- .parse_formula(formula, group, data)
+    stan_args <- list(data = d$stan_data,
+                      cores = detectCores(),
+                      chains = dots$chains %IfNull% 4,
+                      control = dots$control %IfNull% list(adapt_delta = .95)
+                      )
+    stan_args$control$adapt_delta <- stan_args$control$adapt_delta %IfNull% list(adapt_delta = .95)
+    # Avoid arg duplicates
+    dots[names(dots) %in% names(stan_args)] <- NULL
+
+    multi <- d$meta$F > 1
+    sum_coding <- dots$sum_coding %IfNull% FALSE
+
+    if(multi) { # Multidimensional
+        model <- "redifhm_multi_hier"
+    } else if(sum_coding) {
+        model <- "redifhm_sum"
+    } else { # Fallback
+        model <- "redifhm_hier" 
+    }
+
+    stan_args$object <- stanmodels[[model]] 
+
+    stanOut <- do.call(sampling, c(stan_args, dots))
+
+    out <- list()
+    out$meta <- d$meta
+    out$fit <- stanOut
+    out$stan_data <- d$stan_data
+
+    class(out) <- "mires"
+    return(out)
 }
 
 ##' @title Parse formula (list).
