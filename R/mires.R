@@ -24,7 +24,10 @@
 mires <- function(formula, group, data, ...) {
     dots <- list(...)
 
+    # Get parsed data structures
     d <- .parse_formula(formula, group, data)
+
+    # Initialize Stan arguments
     stan_args <- list(data = d$stan_data,
                       cores = detectCores(),
                       chains = dots$chains %IfNull% 4,
@@ -34,9 +37,17 @@ mires <- function(formula, group, data, ...) {
     # Avoid arg duplicates
     dots[names(dots) %in% names(stan_args)] <- NULL
 
+    # Model Configuration
     multi <- d$meta$F > 1
     sum_coding <- dots$sum_coding %IfNull% FALSE
+    eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE
+    prior_only <- dots$prior_only %IfNull% FALSE
+    save_scores <- dots$save_scores %IfNull% FALSE
 
+    stan_args$stan_data$eta_cor_nonmi <- eta_cor_nonmi
+    stan_args$stan_data$prior_only <- prior_only
+
+    ## Select model
     if(multi) { # Multidimensional
         model <- "redifhm_multi_hier"
     } else if(sum_coding) {
@@ -44,10 +55,39 @@ mires <- function(formula, group, data, ...) {
     } else { # Fallback
         model <- "redifhm_hier" 
     }
-
     stan_args$object <- stanmodels[[model]] 
 
+    ## Select params
+    ### Shared params
+    pars <- c("lambda", "resid_log", "nu",
+              "lambda_random", "resid_random", "nu_random",
+              "eta_mean", "eta_sd",
+              "hm_tau", "hm_param", "hm_item", "hm_lambda")
+    if(save_scores) {
+        pars <- c(pars, "eta")
+    }
+    if(multi) {
+    # TODO: Compute Cor mats instead, and change these.
+        pars <- c(pars, "eta_L_fixed", "lambda_resid_nu_mean_logsd_L", "lambda_resid_nu_mean_logsd_sigma") 
+        if(eta_cor_nonmi) {
+            pars <- c(pars, "eta_L_random_weight", "eta_L_random")
+        }
+    }
+    if(!multi) {
+        if(sum_coding) {
+            # TODO: Compute Cor mats instead, and change these.
+            # TODO: Change the model to have naming more consistent with multi model
+            pars <- c(pars, "lambda_resid_nu_random_L", "lambda_resid_nu_random_sigma")
+        } else {
+            # TODO: Compute Cor mats instead, and change these.
+            # TODO: Change the model to have naming more consistent with multi model
+            pars <- c(pars, "lambda_resid_nu_mean_logsd_random_L", "lambda_resid_nu_random_sigma")
+        }
+    }
+
+    stanargs$pars <- pars
     stanOut <- do.call(sampling, c(stan_args, dots))
+
 
     out <- list()
     out$meta <- d$meta

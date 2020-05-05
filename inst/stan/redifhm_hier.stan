@@ -33,6 +33,7 @@ parameters {
   // Random Effects
   matrix[K, total + 2] lambda_resid_nu_mean_logsd_random_z; // 3J Vectors of uncor, std. REs.
   cholesky_factor_corr[total + 2] lambda_resid_nu_mean_logsd_random_L; // Chol. factor of RE correlations
+  // TODO: Try this with estimating the sigma for mean and logsd, like in the multi model.
   vector<lower=0>[total] lambda_resid_nu_random_sigma; // SD of REs: TODO: Should sigma for mean and logsd be estimated, or set to 1? Currently, assuming eta_mean and log(eta_sd) ~ N(0,1)
 
   // Latent
