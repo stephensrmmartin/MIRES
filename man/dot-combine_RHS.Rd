@@ -18,3 +18,4 @@ Combine all unique RHS entries into one RHS formula.
 \author{
 Stephen R. Martin
 }
+\keyword{internal}

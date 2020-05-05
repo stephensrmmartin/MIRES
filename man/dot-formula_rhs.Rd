@@ -20,3 +20,4 @@ Get RHS of formula as character vector.
 \author{
 Stephen R. Martin
 }
+\keyword{internal}

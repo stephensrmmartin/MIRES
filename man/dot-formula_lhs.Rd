@@ -18,3 +18,4 @@ Get the one-length LHS of formula as string.
 \author{
 Stephen R. Martin
 }
+\keyword{internal}

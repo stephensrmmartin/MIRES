@@ -20,6 +20,7 @@
 ##' @import rstan
 ##' @importFrom parallel detectCores
 ##' @author Stephen R. Martin
+##' @export
 mires <- function(formula, group, data, ...) {
     dots <- list(...)
 
@@ -64,6 +65,7 @@ mires <- function(formula, group, data, ...) {
 ##' @return List containing meta-data and stan data.
 ##' @import Formula
 ##' @author Stephen R. Martin
+##' @keywords internal
 .parse_formula <- function(formula, group, data) {
 
     formList <- formula
@@ -141,6 +143,7 @@ mires <- function(formula, group, data, ...) {
 ##' @param terms 
 ##' @return List containing factor (factor names) and indicator (indicator names) as lists.
 ##' @author Stephen R. Martin
+##' @keywords internal
 .formula_names <- function(formList, terms = TRUE) {
     fname <- lapply(formList, .formula_lhs)
     iname <- lapply(formList, .formula_rhs)
@@ -152,6 +155,7 @@ mires <- function(formula, group, data, ...) {
 ##' @param formula Formula.
 ##' @return String. LHS variable of formula. Formula must have only one name on LHS.
 ##' @author Stephen R. Martin
+##' @keywords internal
 .formula_lhs <- function(formula) {
     all.vars(formula)[1]
 }
@@ -161,6 +165,7 @@ mires <- function(formula, group, data, ...) {
 ##' @param terms Logical. Whether to return the formula expressions, or variables (FALSE). I.e., "I(x^2)" instead of "x".
 ##' @return Character vector.
 ##' @author Stephen R. Martin
+##' @keywords internal
 .formula_rhs <- function(formula, terms = TRUE) {
     if(terms) {
         labels(terms(formula))
@@ -174,6 +179,7 @@ mires <- function(formula, group, data, ...) {
 ##' @return Formula. RHS only.
 ##' @author Stephen R. Martin
 ##' @import Formula
+##' @keywords internal
 .combine_RHS <- function(formList) {
     formula_names <- .formula_names(formList, terms = TRUE)
 
@@ -187,6 +193,21 @@ mires <- function(formula, group, data, ...) {
     return(rhs)
 }
 
+##' Generates the "indicator spec" used by Stan
+##'
+##' The indicator spec consists of two parts.
+##' The first part is J_f, or the number of indicators under each factor.
+##' The second part is an [F, J] array, wherein each row defines the 1:J_f[f] columns of the indicator matrix belonging to the factor.
+##' Example:
+##' [1, 3, 5, 0, 0, 0]: J_f[1] = 3
+##' [2, 4, 6, 0, 0, 0]: J_f[2] = 3
+##' [1, 2, 3, 4, 0, 0]: J_f[3] = 4; J = 6; F = 3
+##' @title Generates indicator spec list.
+##' @param formList 
+##' @param mm 
+##' @return 
+##' @author Stephen R. Martin
+##' @keywords internal
 .indicator_spec <- function(formList, mm) {
     F <- length(formList)
     J <- ncol(mm)
