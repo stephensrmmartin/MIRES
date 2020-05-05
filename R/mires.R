@@ -15,7 +15,7 @@
 ##' @param formula Formula (or list of formulas). LHS is the factor name, and RHS contains indicators.
 ##' @param group Grouping variable (as raw name). Grouping variable over which to assess invariance.
 ##' @param data data.frame. Must contain the indicators specified in formula, and the grouping variable.
-##' @param ... 
+##' @param ... Further arguments to \code{\link[rstan]{sampling}}.
 ##' @return mires object.
 ##' @import rstan
 ##' @importFrom parallel detectCores
