@@ -81,7 +81,6 @@
 /* 
    Convex combination of two L cor matrices.
    Converts the Ls to cor matrices, convexly combines them, returns a cholesky-decomposed cor matrix.
-   TODO: Check whether we need to convert to Cors first, or whether convex combinations of cholesky-decomposed R's yields a valid cholesky-decomposed R.
    @param matrix L1: A lower-diagonal matrix.
    @param matrix L2: A lower-diagonal matrix.
    @param vector[1] weight_L2: The weight for LL2.

@@ -79,7 +79,6 @@ transformed parameters {
   row_vector[total_lambda] lambda_est = exp(lambda_log_est) + lambda_lowerbound;
   matrix[F, J] lambda = lambda_mat(J_f, F_ind, lambda_est);
   matrix[F, J] lambda_random[K];
-  // TODO: Compute lambda_lowerbounds using vector; then construct lambda_mat and lambda_mat_random
 
   // Compute stochastic latent errors
   for(k in 1:K) { // Compute upper-triangular cholesky-covariance for each group.
