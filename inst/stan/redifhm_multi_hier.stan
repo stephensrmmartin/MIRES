@@ -41,10 +41,10 @@ parameters {
   row_vector[J] nu;
   row_vector[J] resid_log;
 
-  // Random Effects
-  matrix[K, total_param + 2*F] lambda_resid_nu_mean_logsd_z;
-  cholesky_factor_corr[total_param + 2*F] lambda_resid_nu_mean_logsd_L;
-  vector<lower = 0>[total_param + 2*F] lambda_resid_nu_mean_logsd_sigma; // Assess whether it's ID'd to estimate mean_logsd sigma
+  // Random Effects (Lambdas, Resid-SDs, Nu, Mean eta-score, Logsd of eta-scores
+  matrix[K, total_param + 2*F] random_z;
+  cholesky_factor_corr[total_param + 2*F] random_L;
+  vector<lower = 0>[total_param + 2*F] random_sigma; // Assess whether it's ID'd to estimate mean_logsd sigma
 
   // Latent
   matrix[N, F] eta_z; // NxF matrix of latent factor scores.
@@ -67,12 +67,12 @@ parameters {
 }
 
 transformed parameters {
-  matrix[K, total_param + 2*F] lambda_resid_nu_mean_logsd_random = z_to_random(lambda_resid_nu_mean_logsd_z, lambda_resid_nu_mean_logsd_sigma, lambda_resid_nu_mean_logsd_L);
-  matrix[K, total_lambda] lambda_est_random = lambda_resid_nu_mean_logsd_random[, lamResNu_bounds[1,1]:lamResNu_bounds[1,2]];
-  matrix[K, J] resid_random = lambda_resid_nu_mean_logsd_random[, lamResNu_bounds[2,1]:lamResNu_bounds[2,2]];
-  matrix[K, J] nu_random = lambda_resid_nu_mean_logsd_random[, lamResNu_bounds[3,1]:lamResNu_bounds[3,2]];
-  matrix[K, F] eta_mean = lambda_resid_nu_mean_logsd_random[, (lamResNu_bounds[3,2] + 1):(lamResNu_bounds[3,2] + F)];
-  matrix[K, F] eta_sd = exp(lambda_resid_nu_mean_logsd_random[, (total_param + F + 1):(total_param + 2*F)]);
+  matrix[K, total_param + 2*F] random = z_to_random(random_z, random_sigma, random_L);
+  matrix[K, total_lambda] lambda_est_random = random[, lamResNu_bounds[1,1]:lamResNu_bounds[1,2]];
+  matrix[K, J] resid_random = random[, lamResNu_bounds[2,1]:lamResNu_bounds[2,2]];
+  matrix[K, J] nu_random = random[, lamResNu_bounds[3,1]:lamResNu_bounds[3,2]];
+  matrix[K, F] eta_mean = random[, (lamResNu_bounds[3,2] + 1):(lamResNu_bounds[3,2] + F)];
+  matrix[K, F] eta_sd = exp(random[, (total_param + F + 1):(total_param + 2*F)]);
   matrix[2*F, 2*F] eta_cov_U[K];
   matrix[N, F] eta = eta_mean[group]; // Initialize to means; eta = 0 + mean + stoch. error
   row_vector[total_lambda] lambda_lowerbound = compute_lambda_lowerbounds(lambda_est_random);
@@ -115,9 +115,9 @@ model {
   resid_log ~ std_normal();
   nu ~ normal(0, 1);
 
-  to_vector(lambda_resid_nu_mean_logsd_z) ~ std_normal();
-  lambda_resid_nu_mean_logsd_L ~ lkj_corr_cholesky(1);
-  lambda_resid_nu_mean_logsd_sigma ~ std_normal();
+  to_vector(random_z) ~ std_normal();
+  random_L ~ lkj_corr_cholesky(1);
+  random_sigma ~ std_normal();
 
   to_vector(eta_z) ~ std_normal();
   eta_L_fixed ~ lkj_corr_cholesky(1);
@@ -139,10 +139,10 @@ model {
   hm_lambda ~ std_normal();
 
   // Hierarchical inclusion
-  lambda_resid_nu_mean_logsd_sigma[1:total_param] ~ normal(0, hm_hat);
+  random_sigma[1:total_param] ~ normal(0, hm_hat);
 
   // Priors on the SD of eta-mean and logsd.
-  lambda_resid_nu_mean_logsd_sigma[(total_param + 1) : rows(lambda_resid_nu_mean_logsd_sigma)] ~ normal(0, 1);
+  random_sigma[(total_param + 1) : rows(random_sigma)] ~ normal(0, 1);
 
   if(!prior_only) {
     x_vector ~ normal(to_vector(xhat), to_vector(exp(s_loghat)));
@@ -151,5 +151,5 @@ model {
 }
 
 generated quantities {
-  
+  corr_matrix[total_param + 2*F] RE_cor = L_to_cor(random_L);
 }

@@ -30,9 +30,9 @@ parameters {
   row_vector[J] nu;
   row_vector[J] resid_log;
 
-  // Random Effects
-  matrix[K, total + 2] lambda_resid_nu_mean_logsd_random_z; // 3J Vectors of uncor, std. REs.
-  cholesky_factor_corr[total + 2] lambda_resid_nu_mean_logsd_random_L; // Chol. factor of RE correlations
+  // Random Effects (Lambda, resid, nu, eta mean, eta logsd)
+  matrix[K, total + 2] random_z; // 3J Vectors of uncor, std. REs.
+  cholesky_factor_corr[total + 2] random_L; // Chol. factor of RE correlations
   // TODO: Try this with estimating the sigma for mean and logsd, like in the multi model.
   vector<lower=0>[total] lambda_resid_nu_random_sigma; // SD of REs: TODO: Should sigma for mean and logsd be estimated, or set to 1? Currently, assuming eta_mean and log(eta_sd) ~ N(0,1)
 
@@ -48,13 +48,13 @@ parameters {
 }
 
 transformed parameters {
-  vector<lower=0>[total + 2] lambda_resid_nu_mean_logsd_random_sigma = append_row(lambda_resid_nu_random_sigma, [1.0, 1.0]');
-  matrix[K, total + 2] lambda_resid_nu_mean_logsd_random = z_to_random(lambda_resid_nu_mean_logsd_random_z, lambda_resid_nu_mean_logsd_random_sigma, lambda_resid_nu_mean_logsd_random_L);
-  matrix[K, J] lambda_random = lambda_resid_nu_mean_logsd_random[, lamResNu_indices[1]];
-  matrix[K, J] resid_random = lambda_resid_nu_mean_logsd_random[, lamResNu_indices[2]];
-  matrix[K, J] nu_random = lambda_resid_nu_mean_logsd_random[, lamResNu_indices[3]];
-  vector[K] eta_mean = 0 + lambda_resid_nu_mean_logsd_random[, total + 1];
-  vector[K] eta_sd = exp(lambda_resid_nu_mean_logsd_random[, total + 2]);
+  vector<lower=0>[total + 2] random_sigma = append_row(lambda_resid_nu_random_sigma, [1.0, 1.0]');
+  matrix[K, total + 2] random = z_to_random(random_z, random_sigma, random_L);
+  matrix[K, J] lambda_random = random[, lamResNu_indices[1]];
+  matrix[K, J] resid_random = random[, lamResNu_indices[2]];
+  matrix[K, J] nu_random = random[, lamResNu_indices[3]];
+  vector[K] eta_mean = 0 + random[, total + 1];
+  vector[K] eta_sd = exp(random[, total + 2]);
   row_vector[J] lambda_lowerbound = compute_lambda_lowerbounds(lambda_random);
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   vector[N] eta = eta_mean[group] + eta_z .* eta_sd[group];
@@ -79,8 +79,8 @@ model {
   resid_log ~ normal(0, 1);
   nu ~ normal(0, 1);
 
-  to_vector(lambda_resid_nu_mean_logsd_random_z) ~ std_normal();
-  lambda_resid_nu_mean_logsd_random_L ~ lkj_corr_cholesky(1);
+  to_vector(random_z) ~ std_normal();
+  random_L ~ lkj_corr_cholesky(1);
 
   eta_z ~ std_normal();
 
@@ -102,5 +102,5 @@ model {
 
 
 generated quantities {
-  corr_matrix[total] RE_cor = L_to_cor(lambda_resid_nu_mean_logsd_random_L);
+  corr_matrix[total] RE_cor = L_to_cor(random_L);
 }

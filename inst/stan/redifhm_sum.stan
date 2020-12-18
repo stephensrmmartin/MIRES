@@ -31,10 +31,10 @@ parameters {
   row_vector[J] nu;
   row_vector[J] resid_log;
 
-  // Random Effects
-  matrix[K, total] lambda_resid_nu_random_z; // 3J Vectors of uncor, std. REs.
-  cholesky_factor_corr[total] lambda_resid_nu_random_L; // Chol. factor of RE correlations
-  vector<lower=0>[total] lambda_resid_nu_random_sigma; // SD of REs
+  // Random Effects (Lambda, resid, nu, eta mean, eta logsd)
+  matrix[K, total] random_z; // 3J Vectors of uncor, std. REs.
+  cholesky_factor_corr[total] random_L; // Chol. factor of RE correlations
+  vector<lower=0>[total] random_sigma; // SD of REs
 
   // Latent
   vector[N] eta_z; // N-length vector of latent factor scores; std.
@@ -50,10 +50,10 @@ parameters {
 }
 
 transformed parameters {
-  matrix[K, total] lambda_resid_nu_random = z_to_random(lambda_resid_nu_random_z, lambda_resid_nu_random_sigma, lambda_resid_nu_random_L);
-  matrix[K, J] lambda_random = lambda_resid_nu_random[, lamResNu_indices[1]];
-  matrix[K, J] resid_random = lambda_resid_nu_random[, lamResNu_indices[2]];
-  matrix[K, J] nu_random = lambda_resid_nu_random[, lamResNu_indices[3]];
+  matrix[K, total] random = z_to_random(random_z, random_sigma, random_L);
+  matrix[K, J] lambda_random = random[, lamResNu_indices[1]];
+  matrix[K, J] resid_random = random[, lamResNu_indices[2]];
+  matrix[K, J] nu_random = random[, lamResNu_indices[3]];
   row_vector[J] lambda_lowerbound = compute_lambda_lowerbounds(lambda_random);
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   vector[K] eta_mean = eta_means_stz(eta_mean_s);
@@ -80,8 +80,8 @@ model {
   resid_log ~ normal(0, 1);
   nu ~ normal(0, 1);
 
-  to_vector(lambda_resid_nu_random_z) ~ std_normal();
-  lambda_resid_nu_random_L ~ lkj_corr_cholesky(1);
+  to_vector(random_z) ~ std_normal();
+  random_L ~ lkj_corr_cholesky(1);
 
   eta_z ~ std_normal();
   eta_mean_s ~ std_normal();
@@ -93,7 +93,7 @@ model {
   hm_lambda ~ std_normal();
 
   // Hierarchical inclusion
-  lambda_resid_nu_random_sigma ~ normal(0, hm_hat);
+  random_sigma ~ normal(0, hm_hat);
 
 
   // Likelihood
@@ -105,5 +105,5 @@ model {
 
 
 generated quantities {
-  corr_matrix[total] RE_cor = L_to_cor(lambda_resid_nu_random_L);
+  corr_matrix[total] RE_cor = L_to_cor(random_L);
 }
