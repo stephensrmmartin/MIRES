@@ -39,7 +39,7 @@ mires <- function(formula, group, data, ...) {
 
     # Model Configuration
     multi <- d$meta$F > 1
-    sum_coding <- dots$sum_coding %IfNull% FALSE
+    sum_coding <- dots$sum_coding %IfNull% TRUE
     eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE
     prior_only <- dots$prior_only %IfNull% FALSE
     save_scores <- dots$save_scores %IfNull% FALSE
@@ -66,24 +66,7 @@ mires <- function(formula, group, data, ...) {
     if(save_scores) {
         pars <- c(pars, "eta")
     }
-    if(multi) {
-    # TODO: Compute Cor mats instead, and change these.
-        pars <- c(pars, "eta_L_fixed", "lambda_resid_nu_mean_logsd_L", "lambda_resid_nu_mean_logsd_sigma") 
-        if(eta_cor_nonmi) {
-            pars <- c(pars, "eta_L_random_weight", "eta_L_random")
-        }
-    }
-    if(!multi) {
-        if(sum_coding) {
-            # TODO: Compute Cor mats instead, and change these.
-            # TODO: Change the model to have naming more consistent with multi model
-            pars <- c(pars, "lambda_resid_nu_random_L", "lambda_resid_nu_random_sigma")
-        } else {
-            # TODO: Compute Cor mats instead, and change these.
-            # TODO: Change the model to have naming more consistent with multi model
-            pars <- c(pars, "lambda_resid_nu_mean_logsd_random_L", "lambda_resid_nu_random_sigma")
-        }
-    }
+    pars <- c(pars, "RE_cor", "random_sigma")
 
     stanargs$pars <- pars
     stanOut <- do.call(sampling, c(stan_args, dots))
