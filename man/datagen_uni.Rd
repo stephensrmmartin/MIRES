@@ -30,12 +30,12 @@ Generates data for testing the HMRE/MIRES approach.
 The first entry should be a string specifying one of: constant, random, none, items, params, or custom.
 The other entries depend on the specification desired, as described below.
 \describe{
-  \item{constant} (2) Numeric: All RE SDs are set to this value.
-  \item{random} (2) Numeric: All RE SDs are generated between 0 and this value.
-  \item{none} All RE SDs set to zero (full invariance).
-  \item{items} (2) Numeric: Value of RE SDs for (3) items. E.g., "items", .4, 4 would set all parameters for items 1 to 4 to have an RE SD of .4.
-  \item{params} (2) Numeric: Value of RE SD for parameter type (3), where (3) is an integer (0: Loadings, 1: Residual SDs, 2: Intercepts). E.g., "params", .4, 2 would set all RE-SDs of intercepts to be .4.
-  \item{custom} (2) Numeric: Specify all 3J RE-SDs manually in order of loadings, residual log SDs, and intercepts.
+  \item{constant}{ (2) Numeric: All RE SDs are set to this value.}
+  \item{random}{ (2) Numeric: All RE SDs are generated between 0 and this value.}
+  \item{none}{ All RE SDs set to zero (full invariance).}
+  \item{items}{ (2) Numeric: Value of RE SDs for (3) items. E.g., "items", .4, 4 would set all parameters for items 1 to 4 to have an RE SD of .4.}
+  \item{params}{ (2) Numeric: Value of RE SD for parameter type (3), where (3) is an integer (0: Loadings, 1: Residual SDs, 2: Intercepts). E.g., "params", .4, 2 would set all RE-SDs of intercepts to be .4.}
+  \item{custom}{ (2) Numeric: Specify all 3J RE-SDs manually in order of loadings, residual log SDs, and intercepts.}
 }
 }
 \author{
