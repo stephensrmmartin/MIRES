@@ -18,13 +18,25 @@
 ##' @param n Integer. Number of observations within group.
 ##' @param fixed Named List. lambda, resid_log, nu, in that order.
 ##' @param mipattern List. See details.
+##' @param etadist (Default: NULL). NULL, "std", or a list of two. If NULL (Default), all groups have latent scores distributed standard normal. If "std", means are standard normal, and (log) latent SDs are also standard normal (i.e., standard log normal; product to 1). If a list, slot one provides the K means, slot two provides the K log SDs. These should have a mean of zero (sum to zero) and a mean of 1 (product to 1), respectively.
 ##' @return List of meta(data), params, data, and a data frame.
 ##' @author Stephen Martin
 ##' @keywords internal
-datagen_uni <- function(J, K, n, fixed, mipattern) {
+datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
     N <- K * n # Total rows. Assumes equal number of observations per group.
 
     group <- rep(1:K, each = n)
+
+    eta_mean <- rep(0, K)
+    eta_sd <- rep(1, K)
+    if(etadist == "std") {
+        eta_mean <- rnorm(K)
+        eta_sd <- exp(rnorm(K))
+    }
+    if(is.list(etadist)) {
+        eta_mean <- etadist[[1]]
+        eta_sd <- etadist[[2]]
+    }
 
     paramSD <- switch(mipattern[[1]],
                       constant = rep(mipattern[[2]], J * 3),
@@ -43,14 +55,14 @@ datagen_uni <- function(J, K, n, fixed, mipattern) {
                       )
 
     # Generate REs [Assumption: No correlation]
+    # DONE : Change REs so that the minimum RE lambdas for each j + fixed[j] >= 0; as per HMRE assumption.
+    # Maybe just take samples from abs(rmvnorm(K, fixefs, sigma)) to enforce the positiveness.
+    # Then subtract off the REs to get the randoms.
     ## random <- rmvnorm(K, sigma = diag(paramSD^2))
     random_coefs <- rmvnorm(K, unlist(fixed), diag(paramSD^2))
     random_coefs[, 1:J] <- abs(random_coefs[, 1:J])
     random <- t(t(random_coefs) - unlist(fixed))
 
-    # TODO : Change REs so that the minimum RE lambdas for each j + fixed[j] >= 0; as per HMRE assumption.
-    # Maybe just take samples from abs(rmvnorm(K, fixefs, sigma)) to enforce the positiveness.
-    # Then subtract off the REs to get the randoms.
 
     # Generate observations [Assumption: All means are zero. TODO: Fix this]
     eta <- rnorm(N, 0, 1)
