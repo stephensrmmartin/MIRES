@@ -65,7 +65,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
 
 
     # Generate observations [Assumption: All means are zero. TODO: Fix this]
-    eta <- rnorm(N, 0, 1)
+    eta <- rnorm(N, 0, 1)*eta_sd[group] + eta_mean[group]
 
     # TODO : Define nu, lambda, resid_log; figure out interface for that.
     y <- rep(1, N) %*% t(nu) + eta %*% lambda + # Fixed effects
