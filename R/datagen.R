@@ -1,4 +1,4 @@
-##' Generates data for testing the HMRE/MIRES approach.
+##' Generates unidimensional data for testing the HMRE/MIRES approach.
 ##'
 ##' \code{mipattern} is a list specifying a pattern of MI.
 ##' The first entry should be a string specifying one of: constant, random, none, items, params, or custom.
@@ -11,6 +11,7 @@
 ##'   \item{params}{ (2) Numeric: Value of RE SD for parameter type (3), where (3) is an integer (0: Loadings, 1: Residual SDs, 2: Intercepts). E.g., "params", .4, 2 would set all RE-SDs of intercepts to be .4.}
 ##'   \item{custom}{ (2) Numeric: Specify all 3J RE-SDs manually in order of loadings, residual log SDs, and intercepts.}
 ##' }
+##' Note that this is \emph{not} the generative model specified by MIRES, but a convenience function for meeting the bare assumptions while generating MI or non-MI data.
 ##' 
 ##' @title Unidimensional data generation.
 ##' @param J Integer. Number of indicators.
@@ -21,6 +22,7 @@
 ##' @param etadist (Default: NULL). NULL, "std", or a list of two. If NULL (Default), all groups have latent scores distributed standard normal. If "std", means are standard normal, and (log) latent SDs are also standard normal (i.e., standard log normal; product to 1). If a list, slot one provides the K means, slot two provides the K log SDs. These should have a mean of zero (sum to zero) and a mean of 1 (product to 1), respectively.
 ##' @return List of meta(data), params, data, and a data frame.
 ##' @author Stephen Martin
+##' @importFrom mvtnorm rmvnorm
 ##' @keywords internal
 datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
     N <- K * n # Total rows. Assumes equal number of observations per group.
@@ -63,6 +65,10 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
     random_coefs[, 1:J] <- abs(random_coefs[, 1:J])
     random <- t(t(random_coefs) - unlist(fixed))
 
+    lambda <- fixed$lambda
+    resid_log <- fixed$resid
+    nu <- fixed$nu
+
 
     # Generate observations [Assumption: All means are zero. TODO: Fix this]
     eta <- rnorm(N, 0, 1)*eta_sd[group] + eta_mean[group]
@@ -72,7 +78,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
         random[group, (2*J + 1) : (3 * J)] + # Random intercepts
         eta * random[group, 1 : J] # Random loadings
 
-    err <- matrix(rnorm(0, exp(rep(1, N) %*% t(resid_log) + # Fixed resid
+    err <- matrix(rnorm(N, 0, exp(rep(1, N) %*% t(resid_log) + # Fixed resid
                                random[group, (J + 1) : (2 * J)] # Random resid
                                )),
                   N, J) # Matrixify

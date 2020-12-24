@@ -23,7 +23,7 @@ datagen_uni(J, K, n, fixed, mipattern, etadist = NULL)
 List of meta(data), params, data, and a data frame.
 }
 \description{
-Generates data for testing the HMRE/MIRES approach.
+Generates unidimensional data for testing the HMRE/MIRES approach.
 }
 \details{
 \code{mipattern} is a list specifying a pattern of MI.
@@ -37,6 +37,7 @@ The other entries depend on the specification desired, as described below.
   \item{params}{ (2) Numeric: Value of RE SD for parameter type (3), where (3) is an integer (0: Loadings, 1: Residual SDs, 2: Intercepts). E.g., "params", .4, 2 would set all RE-SDs of intercepts to be .4.}
   \item{custom}{ (2) Numeric: Specify all 3J RE-SDs manually in order of loadings, residual log SDs, and intercepts.}
 }
+Note that this is \emph{not} the generative model specified by MIRES, but a convenience function for meeting the bare assumptions while generating MI or non-MI data.
 }
 \author{
 Stephen Martin
