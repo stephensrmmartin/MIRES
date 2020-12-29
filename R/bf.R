@@ -30,6 +30,7 @@ dhmre <- function(x, mu = 0, sigma = 1) {
 ##' @return Vector.
 ##' @author Stephen R. Martin
 rhmre <- function(n, mu = 0, sigma = 1) {
+    # TODO : Extend this to allow the full HMRE structure (J items, P params, J*P uniques, 1 tau)
     tau <- rnorm(n, mu, sigma)
     item <- rnorm(n, mu, sigma)
     param <- rnorm(n, mu, sigma)
@@ -39,3 +40,9 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 
     abs(rnorm(n, 0, hmre))
 }
+
+# TODO : HDInterval method [and add a 0 to each MCMC sample (or just RE-SDs)]
+
+# TODO : Add logspline method
+
+# TODO : Add pairwise-hmre density estimator; implied prior over hmre prior of u[k] - u[not_k]
