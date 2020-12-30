@@ -43,6 +43,26 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 
 # TODO : HDInterval method [and add a 0 to each MCMC sample (or just RE-SDs)]
 
-# TODO : Add logspline method
+# TODO : Add logspline method (GP-based density estimator? Or Dirichlet-process density estimator?)
 
 # TODO : Add pairwise-hmre density estimator; implied prior over hmre prior of u[k] - u[not_k]
+
+.density.logspline <- function(mcmc, lbound = 0, ...) {
+    lso <- logspline(mcmc, lbound = lbound)
+    df <- function(x) {
+        dlogspline(x, lso)
+    }
+    return(df)
+}
+
+.density.DP <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
+    dpo <- dirichletprocess::DirichletProcessExponential(mcmc, ...)
+    dpo <- dirichletprocess::Fit(dpo, iter)
+    if(mode == "est") {
+        return(dirichletprocess::PosteriorFunction(dpo))
+    } else if (mode == "posterior") {
+        return(function(x, prob = .95) {
+            dirichletprocess::PosteriorFrame(dpo, x, ci_size = 1 - prob, ndraws = iter)
+        })
+    }
+}
