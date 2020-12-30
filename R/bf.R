@@ -55,6 +55,8 @@ rhmre <- function(n, mu = 0, sigma = 1) {
     return(df)
 }
 
+# TODO : Try this again, but with Weibull. Then, again with Stan/vb/optim.
+
 .density.DP <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
     dpo <- dirichletprocess::DirichletProcessExponential(mcmc, ...)
     dpo <- dirichletprocess::Fit(dpo, iter)
