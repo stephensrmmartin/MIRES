@@ -126,30 +126,30 @@ genStickBreakPi <- function(K, alpha) {
 ##' @return Matrix of posterior mean, sd, .025, and .975 intervals.
 ##' @author Stephen R. Martin
 ##' @keywords internal
-predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params, log = TRUE) {
+predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params) {
     pi <- as.matrix(fit, pars = pi)
     params <- lapply(params, function(p){as.matrix(fit, pars = p)})
     names(params) <- R_params
-    predfun_orig <- function(x) {
+    predfun <- function(x) {
         px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K))
         out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
         names(out)[3:4] <- c("Q2.5", "Q97.5")
         out
     }
-    predfun <- function(x) {
-        if(!log) {
-            px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K), na.rm = TRUE)
-        } else if(log) {
-            log_pi <- log(pi)
-            px <- log_pi + matrix(do.call(dens, c(x = x, params, log = TRUE)), nrow(pi), K)
-            px <- apply(px, 2, function(x) {x[is.infinite(x)] <- sign(x[is.infinite(x)])*100; x})
-            px <- exp(px)
-            px <- rowSums(px, na.rm = TRUE)
-        }
-        out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
-        names(out)[3:4] <- c("Q2.5", "Q97.5")
-        out
-    }
-    pxs <- cbind(x, t(sapply(x, predfun_orig)))
+    ## predfun <- function(x) {
+    ##     if(!log) {
+    ##         px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K), na.rm = TRUE)
+    ##     } else if(log) {
+    ##         log_pi <- log(pi)
+    ##         px <- log_pi + matrix(do.call(dens, c(x = x, params, log = TRUE)), nrow(pi), K)
+    ##         px <- apply(px, 2, function(x) {x[is.infinite(x)] <- sign(x[is.infinite(x)])*100; x})
+    ##         px <- exp(px)
+    ##         px <- rowSums(px, na.rm = TRUE)
+    ##     }
+    ##     out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
+    ##     names(out)[3:4] <- c("Q2.5", "Q97.5")
+    ##     out
+    ## }
+    pxs <- cbind(x, t(sapply(x, predfun)))
     pxs
 }
