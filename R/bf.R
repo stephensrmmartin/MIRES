@@ -68,3 +68,74 @@ rhmre <- function(n, mu = 0, sigma = 1) {
         })
     }
 }
+##' @title Generate Truncated Dirichlet Process Mixture.
+##' @param N Number of data points.
+##' @param K Max cluster.
+##' @param param Data.frame of parameters corresponding to d and r distribution  functions.
+##' @param alpha Numeric. The alpha parameter to the DP.
+##' @param f Character. Root name of base or kernel function (e.g., "norm", "exp").
+##' @return List of data (y), weights (pi), params (param), and the true density function (d).
+##' @author Stephen Martin
+##' @keywords internal
+##' @examples
+##' y <- genMixture(1000, 50, data.frame(mean = rnorm(50), sd = abs(rnorm(50, 0, .5))), .4, "norm")
+genMixture <- function(N, K, param, alpha, f) {
+    pi <- genStickBreakPi(K, alpha)
+
+    y <- numeric(N)
+    dens <- eval(as.symbol(paste0("d", f)))
+    rng <- eval(as.symbol(paste0("r",f)))
+
+    k_i <- sample(1:K, N, TRUE, pi)
+    ## y <- mapply(rng, param[k_i, ])
+    y <- do.call(rng, c(n = N, param[k_i,, drop = FALSE]))
+
+    densfun <- function(y) {
+        sum(pi * do.call(dens, c(x = y, param)))
+    }
+    densfun <- Vectorize(densfun, "y")
+
+    list (y = y, pi = pi, param = param, d = densfun)
+
+}
+
+##' @title Stick-breaking function.
+##' @param K Max cluster.
+##' @param alpha Numeric. The alpha parameter to the DP.
+##' @return Vector of DP weights.
+##' @author Stephen Martin
+##' @keywords internal
+genStickBreakPi <- function(K, alpha) {
+    stick_slices <- rbeta(K - 1, 1, alpha)
+    pi <- numeric(length = K)
+    pi[1] <- stick_slices[1]
+    for(k in 2:(K - 1)) {
+        pi[k] <- stick_slices[k] * prod(1 - stick_slices[1:(k - 1)])
+    }
+    pi[k] <- prod(1 - stick_slices[1:(K - 1)])
+    return(pi)
+}
+##' @title Prediction for DP density estimation models.
+##' @param x Values for prediction.
+##' @param fit Stan DP fit.
+##' @param K Max cluster.
+##' @param pi Character. Name of stan variable corresponding to DP weights.
+##' @param dens Function. The density base function used.
+##' @param params Character vector. Names of base/kernel function parameters in Stan (e.g., mu, sigma for normal base functions).
+##' @param R_params Character vector. Names of corresponding parameters for the R equivalent (e.g., mean, sd in dnorm).
+##' @return Matrix of posterior mean, sd, .025, and .975 intervals.
+##' @author Stephen R. Martin
+##' @keywords internal
+predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params) {
+    pi <- as.matrix(fit, pars = pi)
+    params <- lapply(params, function(p){as.matrix(fit, pars = p)})
+    names(params) <- R_params
+    predfun <- function(x) {
+        px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K))
+        out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
+        names(out)[3:4] <- c("Q2.5", "Q97.5")
+        out
+    }
+    pxs <- cbind(x, t(sapply(x, predfun)))
+    pxs
+}
