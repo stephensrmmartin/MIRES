@@ -3,22 +3,30 @@ library(dirichletprocess)
 library(logspline)
 
 # Generate data
-set.seed(15)
-dpTest <- genMixture(1000, 50, data.frame(mean = rnorm(50,0,3), sd = abs(rnorm(50,0,.2))), 1,"norm")
+set.seed(13)
+dpTest <- rhmre(2000, -1, 1)
 
 # Compile stan model
-dpGauss <- stan_model("test/dpGauss.stan")
+dpWeibull <- stan_model("test/dpWeibull.stan")
+dpExp <- stan_model("test/dpExp.stan")
 
 # Estimate [sampling, vb, or optimizing]
-stan_data <- list(N = length(dpTest$y), y = dpTest$y, K = 200)
-dpOut <- vb(dpGauss, data = stan_data, algorithm = "meanfield", importance_resampling = TRUE, tol_rel_obj = .005)
+K <- 50
+stan_data <- list(N = length(dpTest), y = dpTest, K = K)
+## dpOut_sample <- sampling(dpExp, data = stan_data, iter = 500, cores = 4)
+dpOut <- vb(dpExp, data = stan_data,
+            algorithm = "meanfield",
+            importance_resampling = TRUE, tol_rel_obj = .005)
 
 # Fit using R::dirichletprocess
-dpOut2 <- Fit(DirichletProcessGaussian(dpTest$y), 1000)
+## dpOut2 <- Fit(DirichletProcessWeibull(dpTest, c(3,2,2)), 500)
+dpOut2 <- Fit(DirichletProcessExponential(dpTest), 500)
 
 # Plot hist, true density, stan density, and dirichletprocess density
-hist(dpTest$y, breaks = 100, probability = TRUE)
-curve(dpTest$d(x), -10, 5, n = 1000, add = TRUE)
-curve(predictMixture(x,dpOut, 200, dens = dnorm, params = c("mu","sigma"), R_params = c("mean","sd"))[,"mean"], -10, 5, n = 1000, add = TRUE, col = "red")
-curve(PosteriorFunction(dpOut2)(x), -10, 5, n = 1000, add = TRUE, col = "green")
-curve(dlogspline(x,logspline(dpTest$y)), -10, 5, n = 1000, add = TRUE, col = "purple")
+hist(dpTest, breaks = 300, probability = TRUE)
+curve(dhmre(x,-1, 1), 0, 4, n = 1000, add = TRUE)
+curve(predictMixture(x, dpOut, K, dens = dexp, params = c("rate"), R_params = c("rate"))[,"mean"], 0, 4, n = 1000, add = TRUE, col = "red")
+## curve(predictMixture(x, dpOut, K, dens = dweibull, params = c("shape", "scale"), R_params = c("shape", "scale"))[,"mean"], 0, 4, n = 1000, add = TRUE, col = "red")
+## curve(predictMixture(x, dpOut_sample, K, dens = dweibull, params = c("shape", "scale"), R_params = c("shape", "scale"))[,"mean"], 0, 4, n = 1000, add = TRUE, col = "blue")
+curve(dlogspline(x,logspline(dpTest, lbound = 0)), 0, 5, n = 1000, add = TRUE, col = "purple")
+curve(PosteriorFunction(dpOut2)(x), 0, 4, n = 1000, add = TRUE, col = "green")

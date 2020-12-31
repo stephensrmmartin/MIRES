@@ -29,8 +29,7 @@ parameters {
   vector<lower = 0, upper = 1>[K - 1] stick_slices;
 
   // Cluster params
-  vector<lower=1>[K] shape; // Originally lower = 0, but at Weibull(0 | 0 < k < 1, scale) = Inf
-  vector<lower=0>[K] scale;
+  vector<lower=0>[K] rate;
 }
 
 transformed parameters {
@@ -43,8 +42,7 @@ model {
   vector[K] log_pi = log(pi);
 
   // Priors
-  shape ~ normal(0, 3);
-  scale ~ normal(0, 2);
+  rate ~ normal(0, 3);
 
   alpha ~ gamma(2, 2);
   stick_slices ~ beta(1, alpha);
@@ -58,7 +56,7 @@ model {
   for(n in 1:N) {
     vector[K] lp_y = log_pi;
     for(k in 1:K) {
-      lp_y[k] += weibull_lpdf(y[n] | shape[k], scale[k]);
+      lp_y[k] += exponential_lpdf(y[n] | rate[k]);
     }
     target += log_sum_exp(lp_y);
   }
