@@ -29,7 +29,7 @@ parameters {
   vector<lower = 0, upper = 1>[K - 1] stick_slices;
 
   // Cluster params
-  vector<lower=1>[K] shape; // Originally lower = 0, but at Weibull(0 | 0 < k < 1, scale) = Inf
+  vector<lower=0>[K] shape; // Originally lower = 0, but at Weibull(0 | 0 < k < 1, scale) = Inf
   vector<lower=0>[K] scale;
 }
 
@@ -66,5 +66,15 @@ model {
 }
 
 generated quantities {
+  // Density at zero.
+  real py_0;
+  {
+    vector[K] log_pi = log(pi);
+    vector[K] lp_y0 = log_pi;
+    for(k in 1:K) {
+      lp_y0[k] += weibull_lpdf(0.0 | shape[k], scale[k]);
+    }
+    py_0 = sum(exp(lp_y0));
+  }
   
 }

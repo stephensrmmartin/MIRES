@@ -30,6 +30,7 @@ parameters {
 
   // Cluster params
   vector<lower=0>[K] rate;
+
 }
 
 transformed parameters {
@@ -60,7 +61,7 @@ model {
     }
     target += log_sum_exp(lp_y);
   }
-  
+
 }
 
 generated quantities {
