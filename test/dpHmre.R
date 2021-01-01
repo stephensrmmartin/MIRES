@@ -11,9 +11,9 @@ set.seed(13)
 dpTest <- rhmre(2000, -1, 1)
 
 # Compile stan model
-dpWeibull <- stan_model("test/dpWeibull.stan")
-dpExp <- stan_model("test/dpExp.stan")
-dpHn <- stan_model("test/dpHNormal.stan")
+dpWeibull <- stan_model("inst/stan/dpWeibull.stan")
+dpExp <- stan_model("inst/stan/dpExp.stan")
+dpHn <- stan_model("inst/stan/dpHNormal.stan")
 
 # Estimate [sampling, vb, or optimizing]
 K <- 50

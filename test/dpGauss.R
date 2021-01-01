@@ -51,7 +51,7 @@ set.seed(14)
 dpTest <- genMixtureGaussian(1000, 50, rnorm(50,0,3), abs(rnorm(50,0,.3)), 1)
 
 # Compile stan model
-dpGauss <- stan_model("test/dpGauss.stan")
+dpGauss <- stan_model("inst/stan//dpGauss.stan")
 
 # Estimate [sampling, vb, or optimizing]
 stan_data <- list(N = length(dpTest$y), y = dpTest$y, K = 200)
