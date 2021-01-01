@@ -57,7 +57,7 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 
 # TODO : Try this again, but with Weibull. Then, again with Stan/vb/optim.
 
-.density.DP <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
+.density.dirichletprocess <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
     dpo <- dirichletprocess::DirichletProcessExponential(mcmc, ...)
     dpo <- dirichletprocess::Fit(dpo, iter)
     if(mode == "est") {
@@ -68,6 +68,45 @@ rhmre <- function(n, mu = 0, sigma = 1) {
         })
     }
 }
+
+.density.stan <- function(mcmc, mode = "est", K = 100, model = "dpHNormal", ...) {
+    dots <- list(...)
+    stan_data <- list(N = length(mcmc),
+                      y = mcmc,
+                      K = K)
+    stanOut <- rstan::vb(stanmodels[[model]],
+                         data = stan_data,
+                         importance_resampling = TRUE,
+                         tol_rel_obj = dots$tol_rel_obj %IfNull% .005
+                         )
+    if(mode == "posterior") {
+        fun <- function(x) {
+            predictPosterior(x, stanOut, K, dens = dpnorm, params = c("location", "scale"),
+                             R_params = c("mu", "sigma"))
+        }
+    } else if (mode == "est") {
+        fun <- function(x) {
+            predictPosterior(x, stanOut, K, dens = dpnorm, params = c("location", "scale"),
+                             R_params = c("mu", "sigma"))[,"mean"]
+        }
+    }
+    return(fun)
+}
+
+dpnorm <- function(x, mu = 0, sigma = 1) {
+    ## unnormalized <- dnorm(x, mean = mu, sd = sigma)
+    ## normalized <- unnormalized
+    ## normalized[normalized < 0] <- NA # Support is [0, Inf)
+    ## normalized <- normalized / pnorm(0, mean = mu, sd = sigma, lower.tail = FALSE)
+    ## if(log) normalized <- log(normalized)
+    ## normalized
+    truncnorm::dtruncnorm(x, mean = mu, sd = sigma, a = 0, b = Inf)
+}
+
+rpnorm <- function(n, mu = 0, sigma = 1) {
+    truncnorm::rtruncnorm(n, mean = mu, sd = sigma, a = 0, b = Inf)
+}
+
 ##' @title Generate Truncated Dirichlet Process Mixture.
 ##' @param N Number of data points.
 ##' @param K Max cluster.

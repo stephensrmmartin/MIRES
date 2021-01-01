@@ -22,7 +22,9 @@ Imports:
     Formula (>= 1.2-1),
     stats (>= 3.4.0),
     parallel (>= 3.4.0),
-    mvtnorm (>= 1.0)
+    mvtnorm (>= 1.0),
+    dirichletprocess (>= 0.4.0),
+    truncnorm (>= 1.0)
 LinkingTo: 
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
