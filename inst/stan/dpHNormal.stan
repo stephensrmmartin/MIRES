@@ -44,7 +44,8 @@ model {
 
   // Priors
   location ~ normal(0, 3);
-  scale ~ normal(0, 2);
+  /* scale ~ normal(0, 2); */
+  scale ~ exponential(5);
 
   alpha ~ gamma(2, 2);
   stick_slices ~ beta(1, alpha);

@@ -46,7 +46,16 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 # TODO : Add logspline method (GP-based density estimator? Or Dirichlet-process density estimator?)
 
 # TODO : Add pairwise-hmre density estimator; implied prior over hmre prior of u[k] - u[not_k]
-
+##' .. content for \description{} (no empty lines) ..
+##'
+##' .. content for \details{} ..
+##' @title Create logspline-based density function.
+##' @param mcmc MCMC samples.
+##' @param lbound Integer (Default: 0).
+##' @param ... Not used.
+##' @return Density Function.
+##' @author Stephen Martin
+##' @keywords internal
 .density.logspline <- function(mcmc, lbound = 0, ...) {
     lso <- logspline(mcmc, lbound = lbound)
     df <- function(x) {
@@ -56,7 +65,14 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 }
 
 # TODO : Try this again, but with Weibull. Then, again with Stan/vb/optim.
-
+##' @title Create dirichletprocess (exponential) based density function.
+##' @param mcmc MCMC samples.
+##' @param iter MH Iterations to run.
+##' @param mode posterior or est.
+##' @param ... Not used.
+##' @return Function returning a matrix (if posterior) or vector (if est).
+##' @author Stephen R. Martin
+##' @keywords internal
 .density.dirichletprocess <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
     dpo <- dirichletprocess::DirichletProcessExponential(mcmc, ...)
     dpo <- dirichletprocess::Fit(dpo, iter)
@@ -69,7 +85,16 @@ rhmre <- function(n, mu = 0, sigma = 1) {
     }
 }
 
-.density.stan <- function(mcmc, mode = "est", K = 100, model = "dpHNormal", ...) {
+##' @title Create Stan-based density function.
+##' @param mcmc MCMC samples.
+##' @param mode posterior or est.
+##' @param K Number of DP components (Default: 200)
+##' @param model dpHNormal, dpExp, dpGauss, or dpWeibull (Default: dpHNormal).
+##' @param ... Not used.
+##' @return Function returning vector (if est) or matrix (if posterior)
+##' @author Stephen Martin
+##' @keywords internal
+.density.stan <- function(mcmc, mode = "est", K = 200, model = "dpHNormal", ...) {
     dots <- list(...)
     stan_data <- list(N = length(mcmc),
                       y = mcmc,
@@ -79,15 +104,25 @@ rhmre <- function(n, mu = 0, sigma = 1) {
                          importance_resampling = TRUE,
                          tol_rel_obj = dots$tol_rel_obj %IfNull% .005
                          )
+    params <- list(
+        dpHNormal = list(params = c("location", "scale"), R_params = c("mu", "sigma"), dens = dpnorm),
+        dpExp = list(params = c("rate"), R_params = "rate", dens = dexp),
+        dpGauss = list(params = c("mu", "sigma"), R_params = c("mean", "sd"), dens = dnorm),
+        dpWeibull = list(params = c("shape", "scale"), R_params = c("shape", "scale"), dens = dweibull)
+    )
     if(mode == "posterior") {
         fun <- function(x) {
-            predictPosterior(x, stanOut, K, dens = dpnorm, params = c("location", "scale"),
-                             R_params = c("mu", "sigma"))
+            predictMixture(x, stanOut, K,
+                           dens = params[[model]]$dens,
+                           params = params[[model]]$params,
+                           R_params = params[[model]]$R_params)
         }
     } else if (mode == "est") {
         fun <- function(x) {
-            predictPosterior(x, stanOut, K, dens = dpnorm, params = c("location", "scale"),
-                             R_params = c("mu", "sigma"))[,"mean"]
+            predictMixture(x, stanOut, K,
+                           dens = params[[model]]$dens,
+                           params = params[[model]]$params,
+                           R_params = params[[model]]$R_params)[,"mean"]
         }
     }
     return(fun)
@@ -191,4 +226,24 @@ predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params) {
     ## }
     pxs <- cbind(x, t(sapply(x, predfun)))
     pxs
+}
+
+posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
+    pars <- "random_sigma"
+    samps <- as.matrix(mires$fit, pars = pars)
+    n_cols <- ncol(samps)
+    if(add_zero) {
+        samps <- rbind(0, samps)
+    }
+
+    # Try logspline FIRST, and fix with DP if failed.
+    funs <- apply(samps, 2, .density.logspline)
+
+    # Which failed?
+    failed <- which(!is.function(funs))
+
+    # Recompute using HNormal DP
+    funs[failed] <- apply(samps[, failed], .density.stan, ...)
+
+    return(funs)
 }
