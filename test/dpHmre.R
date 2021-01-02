@@ -8,16 +8,14 @@ dposNorm <- function(x, mu, sd) {
 
 # Generate data
 set.seed(13)
-dpTest <- MIRES:::rhmre(2000, -1, 1)
+dpTest <- MIRES:::rhmre(4000, -1, 1)
 
 # Get Stan method
 dfun.stan <- MIRES:::.density.stan(dpTest, K = 200)
-dfun.stan_exponential <- MIRES:::.density.stan(dpTest, K = 200, model = "dpExp")
 
 # Compare
 MIRES:::dhmre(0, -1, 1)
 dfun.stan(0)
-dfun.stan_exponential(0)
 logspline::dlogspline(0, logspline::logspline(dpTest, lbound = 0))
 
 # Plot hist, true density, stan density, and dirichletprocess density
