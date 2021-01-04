@@ -21,7 +21,7 @@ data {
 
 transformed data {
   real location_spike = 0;
-  real sigma_spike = .001;
+  real sigma_spike = .00001;
   
 }
 
