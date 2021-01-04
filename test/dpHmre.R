@@ -11,11 +11,17 @@ set.seed(13)
 dpTest <- MIRES:::rhmre(4000, -2, .5)
 
 # Get Stan method
-dfun.stan <- MIRES:::.density.stan(dpTest, K = 200)
+dfun.stan <- MIRES:::.density.stan(dpTest, K = 100)
+
+# Get spiked variant
+spiked <- stan_model("inst/stan/dpHNormalSpike.stan")
+stan_data <- list(N = length(dpTest), y = dpTest, K = 100)
+spikedOut <- vb(spiked, stan_data, tol_rel_obj = .005)
 
 # Compare
 MIRES:::dhmre(0, -2, .5)
 dfun.stan(0)
+summary(spikedOut, pars = c("py_0", "pi_mix"))$summary
 logspline::dlogspline(0, logspline::logspline(dpTest, lbound = 0))
 
 # Plot hist, true density, stan density, and dirichletprocess density

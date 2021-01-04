@@ -56,6 +56,8 @@ model {
   alpha ~ gamma(2, 2);
   stick_slices ~ beta(1, alpha);
 
+  pi_mix ~ beta(1, alpha);
+
   // Model
   /*
     p(y|...) = sum_k pi_k p(y | theta_k)
@@ -76,14 +78,16 @@ model {
 
 generated quantities {
   // Density at zero.
-  /* real py_0; */
-  /* { */
-  /*   vector[K] log_pi = log(pi); */
-  /*   vector[K] lp_y0 = log_pi; */
-  /*   for(k in 1:K) { */
-  /*     lp_y0[k] += normal_lpdf(0.0 | location[k], scale[k]) - normal_lccdf(0 | location[k], scale[k]); */
-  /*   } */
-  /*   py_0 = sum(exp(lp_y0)); */
-  /* } */
+  real py_0;
+  {
+    vector[K] log_pi = log(pi);
+    vector[K] lp_y0 = log_pi;
+    real lp_dp;
+    for(k in 1:K) {
+      lp_y0[k] += normal_lpdf(0.0 | location[k], scale[k]) - normal_lccdf(0 | location[k], scale[k]);
+    }
+    lp_dp = log_sum_exp(lp_y0);
+    py_0 = exp(log_mix(pi_mix, lp_dp, normal_lpdf(0.0 | location_spike, sigma_spike) - log(.5)));
+  }
   
 }
