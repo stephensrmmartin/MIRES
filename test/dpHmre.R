@@ -8,7 +8,7 @@ dposNorm <- function(x, mu, sd) {
 
 # Generate data
 set.seed(13)
-hmre_mu <- -.2
+hmre_mu <- -2
 hmre_sigma <- .5
 dpTest <- MIRES:::rhmre(4000, hmre_mu, hmre_sigma)
 
