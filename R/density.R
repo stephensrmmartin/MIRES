@@ -105,10 +105,18 @@ rhmre <- function(n, mu = 0, sigma = 1) {
                          tol_rel_obj = dots$tol_rel_obj %IfNull% .005
                          )
     params <- list(
-        dpHNormal = list(params = c("location", "scale"), R_params = c("mu", "sigma"), dens = dpnorm),
-        dpExp = list(params = c("rate"), R_params = "rate", dens = dexp),
-        dpGauss = list(params = c("mu", "sigma"), R_params = c("mean", "sd"), dens = dnorm),
-        dpWeibull = list(params = c("shape", "scale"), R_params = c("shape", "scale"), dens = dweibull)
+        dpHNormal = list(params = c("location", "scale"),
+                         R_params = c("mu", "sigma"),
+                         dens = dpnorm),
+        dpExp = list(params = c("rate"),
+                     R_params = "rate",
+                     dens = dexp),
+        dpGauss = list(params = c("mu", "sigma"),
+                       R_params = c("mean", "sd"),
+                       dens = dnorm),
+        dpWeibull = list(params = c("shape", "scale"),
+                         R_params = c("shape", "scale"),
+                         dens = dweibull)
     )
     if(mode == "posterior") {
         fun <- function(x) {
@@ -124,17 +132,34 @@ rhmre <- function(n, mu = 0, sigma = 1) {
                            params = params[[model]]$params,
                            R_params = params[[model]]$R_params)[,"mean"]
         }
-    }
+    } 
+     
     return(fun)
 }
 
+.density.stan_spike <- function(mcmc, mode = "est", K = 200, spike_scale = .00001, ...) {
+    dots <- list(...)
+    stan_data <- list(N = length(mcmc),
+                      y = mcmc,
+                      K = K)
+    stanOut <- rstan::vb(stanmodels[["dpHNormalSpike"]],
+                         data = stan_data,
+                         importance_resampling = TRUE,
+                         tol_rel_obj = dots$tol_rel_obj %IfNull% .005)
+
+    pi_mix <- as.matrix(stanOut, pars = c("pi_mix"))
+
+    fun <- function(x) {
+        # Samples of the DP-part of prediction
+        samps <- predictMixture(x, stanOut, K,
+                        dens = dpnorm,
+                        params = c("location", "scale"),
+                        R_params = c("mu", "sigma"),
+                        samps = TRUE)
+    }
+}
+
 dpnorm <- function(x, mu = 0, sigma = 1) {
-    ## unnormalized <- dnorm(x, mean = mu, sd = sigma)
-    ## normalized <- unnormalized
-    ## normalized[normalized < 0] <- NA # Support is [0, Inf)
-    ## normalized <- normalized / pnorm(0, mean = mu, sd = sigma, lower.tail = FALSE)
-    ## if(log) normalized <- log(normalized)
-    ## normalized
     truncnorm::dtruncnorm(x, mean = mu, sd = sigma, a = 0, b = Inf)
 }
 
@@ -200,32 +225,27 @@ genStickBreakPi <- function(K, alpha) {
 ##' @return Matrix of posterior mean, sd, .025, and .975 intervals.
 ##' @author Stephen R. Martin
 ##' @keywords internal
-predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params) {
+predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params, samps = FALSE) {
     pi <- as.matrix(fit, pars = pi)
     params <- lapply(params, function(p){as.matrix(fit, pars = p)})
     names(params) <- R_params
-    predfun <- function(x) {
-        px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K))
-        out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
-        names(out)[3:4] <- c("Q2.5", "Q97.5")
-        out
+    if(!samps) {
+        predfun <- function(x) {
+            px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K))
+            out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
+            names(out)[3:4] <- c("Q2.5", "Q97.5")
+            out
+        }
+        pxs <- cbind(x, t(sapply(x, predfun)))
+        return(pxs)
+    } else if(samps) {
+        predfun <- function(x) {
+            px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K))
+            px
+        }
+        pxs <- sapply(x, predfun)
+        return(pxs)
     }
-    ## predfun <- function(x) {
-    ##     if(!log) {
-    ##         px <- rowSums(pi * matrix(do.call(dens, c(x = x, params)), nrow(pi), K), na.rm = TRUE)
-    ##     } else if(log) {
-    ##         log_pi <- log(pi)
-    ##         px <- log_pi + matrix(do.call(dens, c(x = x, params, log = TRUE)), nrow(pi), K)
-    ##         px <- apply(px, 2, function(x) {x[is.infinite(x)] <- sign(x[is.infinite(x)])*100; x})
-    ##         px <- exp(px)
-    ##         px <- rowSums(px, na.rm = TRUE)
-    ##     }
-    ##     out <- c(mean = mean(px), sd = sd(px), quantile(px, c(.025, .975)))
-    ##     names(out)[3:4] <- c("Q2.5", "Q97.5")
-    ##     out
-    ## }
-    pxs <- cbind(x, t(sapply(x, predfun)))
-    pxs
 }
 
 ##' For each RE-SD, approximates the marginal posterior density from MCMC samples for use in BF calculations.
