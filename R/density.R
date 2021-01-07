@@ -310,7 +310,7 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
     }
 
     # Recompute using HNormal DP
-    funs[failed] <- apply(samps[, failed], .density.stan, ...)
+    funs[failed] <- apply(samps[, failed], .density.stan_spike, ...)
 
     return(funs)
 }
