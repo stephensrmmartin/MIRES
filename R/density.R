@@ -46,9 +46,6 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 # TODO : Add logspline method (GP-based density estimator? Or Dirichlet-process density estimator?)
 
 # TODO : Add pairwise-hmre density estimator; implied prior over hmre prior of u[k] - u[not_k]
-##' .. content for \description{} (no empty lines) ..
-##'
-##' .. content for \details{} ..
 ##' @title Create logspline-based density function.
 ##' @param mcmc MCMC samples.
 ##' @param lbound Integer (Default: 0).
@@ -137,6 +134,14 @@ rhmre <- function(n, mu = 0, sigma = 1) {
     return(fun)
 }
 
+##' @title Create Stan-based spike-mixture DP based density estimation function.
+##' @param mcmc MCMC samples.
+##' @param mode posterior or est.
+##' @param K Number of DP components (Default: 200)
+##' @param spike_scale Numeric (Default: .00001). The scale of the half-normal spike.
+##' @param ... Not used.
+##' @return Function.
+##' @author Stephen R Martin
 .density.stan_spike <- function(mcmc, mode = "est", K = 200, spike_scale = .00001, ...) {
     dots <- list(...)
     stan_data <- list(N = length(mcmc),
@@ -149,13 +154,41 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 
     pi_mix <- as.matrix(stanOut, pars = c("pi_mix"))
 
-    fun <- function(x) {
+    fun.samps <- function(x) {
         # Samples of the DP-part of prediction
         samps <- predictMixture(x, stanOut, K,
                         dens = dpnorm,
                         params = c("location", "scale"),
                         R_params = c("mu", "sigma"),
                         samps = TRUE)
+        samps <- apply(samps, 2, function(x){x * (pi_mix)}) # Multiply DP_y by 1 - pi_mix
+        ## samps <- samps * (1 - pi_mix) # p(y|DP) = p(y|DP) * (1 - pi_mix)
+        spike_dens <- dpnorm(x, 0, spike_scale)
+        spike_samps <- sapply(spike_dens, function(x) {x * (1 - pi_mix)})
+        samps <- samps + spike_samps
+        return(samps)
+    }
+
+    fun.posterior <- function(x) {
+        samps <- fun.samps(x)
+        out <- t(apply(samps, 2, function(x) {
+            c(mean = mean(x), sd = sd(x), quantile(x, c(.025, .975)))
+        }))
+        colnames(out) <- c("mean", "sd", "Q2.5", "Q97.5")
+        out
+    }
+
+    fun.est <- function(x) {
+        out <- fun.posterior(x)[,"mean"]
+        out
+    }
+
+    if(mode == "est") {
+        return(fun.est)
+    } else if(mode == "posterior") {
+        return(fun.posterior)
+    } else if(mode == "samps") {
+        return(fun.samps)
     }
 }
 
