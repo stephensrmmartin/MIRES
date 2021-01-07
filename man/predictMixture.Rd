@@ -4,7 +4,7 @@
 \alias{predictMixture}
 \title{Prediction for DP density estimation models.}
 \usage{
-predictMixture(x, fit, K, pi = "pi", dens, params, R_params)
+predictMixture(x, fit, K, pi = "pi", dens, params, R_params, samps = FALSE)
 }
 \arguments{
 \item{x}{Values for prediction.}

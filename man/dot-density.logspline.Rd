@@ -17,10 +17,7 @@
 Density Function.
 }
 \description{
-.. content for \description{} (no empty lines) ..
-}
-\details{
-.. content for \details{} ..
+Create logspline-based density function.
 }
 \author{
 Stephen Martin
