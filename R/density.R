@@ -29,6 +29,7 @@ dhmre <- function(x, mu = 0, sigma = 1) {
 ##' @param sigma Numeric. (Default: 1; must be > 0). HMRE prior scale.
 ##' @return Vector.
 ##' @author Stephen R. Martin
+##' @keywords internal
 rhmre <- function(n, mu = 0, sigma = 1) {
     # TODO : Extend this to allow the full HMRE structure (J items, P params, J*P uniques, 1 tau)
     tau <- rnorm(n, mu, sigma)
@@ -142,6 +143,7 @@ ddirichletprocess_stan <- function(mcmc, mode = "est", K = 200, model = "dpHNorm
 ##' @param ... Not used.
 ##' @return Function.
 ##' @author Stephen R Martin
+##' @keywords internal
 ddirichletprocess_spike <- function(mcmc, mode = "est", K = 200, spike_scale = .00001, ...) {
     dots <- list(...)
     stan_data <- list(N = length(mcmc),

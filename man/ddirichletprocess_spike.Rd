@@ -26,3 +26,4 @@ Create Stan-based spike-mixture DP based density estimation function.
 \author{
 Stephen R Martin
 }
+\keyword{internal}
