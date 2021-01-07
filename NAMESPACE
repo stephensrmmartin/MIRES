@@ -3,6 +3,8 @@
 export(mires)
 import(Formula)
 import(Rcpp)
+import(dirichletprocess)
+import(logspline)
 import(methods)
 import(rstan)
 importFrom(mvtnorm,rmvnorm)

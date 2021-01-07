@@ -13,19 +13,13 @@ hmre_sigma <- .5
 dpTest <- MIRES:::rhmre(4000, hmre_mu, hmre_sigma)
 
 # Get Stan method
-dfun.stan <- MIRES:::.density.stan(dpTest, K = 100)
-dfun.stan_spike <- MIRES:::.density.stan_spike(dpTest, K = 100)
-
-# Get spiked variant
-spiked <- stan_model("inst/stan/dpHNormalSpike.stan")
-stan_data <- list(N = length(dpTest), y = dpTest, K = 100)
-spikedOut <- vb(spiked, stan_data, tol_rel_obj = .005)
+dfun.stan <- MIRES:::ddirichletprocess_stan(dpTest, K = 100)
+dfun.stan_spike <- MIRES:::ddirichletprocess_spike(dpTest, K = 100)
 
 # Compare
 MIRES:::dhmre(0, hmre_mu, hmre_sigma)
 dfun.stan(0)
 dfun.stan_spike(0)
-summary(spikedOut, pars = c("py_0", "pi_mix"))$summary
 logspline::dlogspline(0, logspline::logspline(dpTest, lbound = 0))
 
 # Plot hist, true density, stan density, and dirichletprocess density

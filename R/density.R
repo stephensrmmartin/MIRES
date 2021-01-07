@@ -43,25 +43,24 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 
 # TODO : HDInterval method [and add a 0 to each MCMC sample (or just RE-SDs)]
 
-# TODO : Add logspline method (GP-based density estimator? Or Dirichlet-process density estimator?)
-
 # TODO : Add pairwise-hmre density estimator; implied prior over hmre prior of u[k] - u[not_k]
+
 ##' @title Create logspline-based density function.
 ##' @param mcmc MCMC samples.
 ##' @param lbound Integer (Default: 0).
 ##' @param ... Not used.
 ##' @return Density Function.
 ##' @author Stephen Martin
+##' @import logspline
 ##' @keywords internal
-.density.logspline <- function(mcmc, lbound = 0, ...) {
-    lso <- logspline(mcmc, lbound = lbound)
+dlogspline <- function(mcmc, lbound = 0, ...) {
+    lso <- logspline::logspline(mcmc, lbound = lbound)
     df <- function(x) {
-        dlogspline(x, lso)
+        logspline::dlogspline(x, lso)
     }
     return(df)
 }
 
-# TODO : Try this again, but with Weibull. Then, again with Stan/vb/optim.
 ##' @title Create dirichletprocess (exponential) based density function.
 ##' @param mcmc MCMC samples.
 ##' @param iter MH Iterations to run.
@@ -69,8 +68,9 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 ##' @param ... Not used.
 ##' @return Function returning a matrix (if posterior) or vector (if est).
 ##' @author Stephen R. Martin
+##' @import dirichletprocess
 ##' @keywords internal
-.density.dirichletprocess <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
+ddirichletprocess <- function(mcmc, iter = 500, mode = c("posterior", "est"), ...) {
     dpo <- dirichletprocess::DirichletProcessExponential(mcmc, ...)
     dpo <- dirichletprocess::Fit(dpo, iter)
     if(mode == "est") {
@@ -91,7 +91,7 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 ##' @return Function returning vector (if est) or matrix (if posterior)
 ##' @author Stephen Martin
 ##' @keywords internal
-.density.stan <- function(mcmc, mode = "est", K = 200, model = "dpHNormal", ...) {
+ddirichletprocess_stan <- function(mcmc, mode = "est", K = 200, model = "dpHNormal", ...) {
     dots <- list(...)
     stan_data <- list(N = length(mcmc),
                       y = mcmc,
@@ -117,14 +117,14 @@ rhmre <- function(n, mu = 0, sigma = 1) {
     )
     if(mode == "posterior") {
         fun <- function(x) {
-            predictMixture(x, stanOut, K,
+            predict_DP(x, stanOut, K,
                            dens = params[[model]]$dens,
                            params = params[[model]]$params,
                            R_params = params[[model]]$R_params)
         }
     } else if (mode == "est") {
         fun <- function(x) {
-            predictMixture(x, stanOut, K,
+            predict_DP(x, stanOut, K,
                            dens = params[[model]]$dens,
                            params = params[[model]]$params,
                            R_params = params[[model]]$R_params)[,"mean"]
@@ -142,7 +142,7 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 ##' @param ... Not used.
 ##' @return Function.
 ##' @author Stephen R Martin
-.density.stan_spike <- function(mcmc, mode = "est", K = 200, spike_scale = .00001, ...) {
+ddirichletprocess_spike <- function(mcmc, mode = "est", K = 200, spike_scale = .00001, ...) {
     dots <- list(...)
     stan_data <- list(N = length(mcmc),
                       y = mcmc,
@@ -156,13 +156,12 @@ rhmre <- function(n, mu = 0, sigma = 1) {
 
     fun.samps <- function(x) {
         # Samples of the DP-part of prediction
-        samps <- predictMixture(x, stanOut, K,
+        samps <- predict_DP(x, stanOut, K,
                         dens = dpnorm,
                         params = c("location", "scale"),
                         R_params = c("mu", "sigma"),
                         samps = TRUE)
         samps <- apply(samps, 2, function(x){x * (pi_mix)}) # Multiply DP_y by 1 - pi_mix
-        ## samps <- samps * (1 - pi_mix) # p(y|DP) = p(y|DP) * (1 - pi_mix)
         spike_dens <- dpnorm(x, 0, spike_scale)
         spike_samps <- sapply(spike_dens, function(x) {x * (1 - pi_mix)})
         samps <- samps + spike_samps
@@ -211,7 +210,7 @@ rpnorm <- function(n, mu = 0, sigma = 1) {
 ##' @keywords internal
 ##' @examples
 ##' y <- genMixture(1000, 50, data.frame(mean = rnorm(50), sd = abs(rnorm(50, 0, .5))), .4, "norm")
-genMixture <- function(N, K, param, alpha, f) {
+simulate_DP <- function(N, K, param, alpha, f) {
     pi <- genStickBreakPi(K, alpha)
 
     y <- numeric(N)
@@ -258,7 +257,7 @@ genStickBreakPi <- function(K, alpha) {
 ##' @return Matrix of posterior mean, sd, .025, and .975 intervals.
 ##' @author Stephen R. Martin
 ##' @keywords internal
-predictMixture <- function(x, fit, K, pi = "pi", dens, params, R_params, samps = FALSE) {
+predict_DP <- function(x, fit, K, pi = "pi", dens, params, R_params, samps = FALSE) {
     pi <- as.matrix(fit, pars = pi)
     params <- lapply(params, function(p){as.matrix(fit, pars = p)})
     names(params) <- R_params
@@ -301,7 +300,7 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
     }
 
     # Try logspline FIRST, and fix with DP if failed.
-    funs <- apply(samps, 2, .density.logspline)
+    funs <- apply(samps, 2, dlogspline)
 
     # Which failed?
     failed <- which(!is.function(funs))
@@ -310,7 +309,7 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
     }
 
     # Recompute using HNormal DP
-    funs[failed] <- apply(samps[, failed], .density.stan_spike, ...)
+    funs[failed] <- apply(samps[, failed], ddirichletprocess_spike, ...)
 
     return(funs)
 }
