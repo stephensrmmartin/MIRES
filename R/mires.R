@@ -43,9 +43,10 @@ mires <- function(formula, group, data, ...) {
     eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE
     prior_only <- dots$prior_only %IfNull% FALSE
     save_scores <- dots$save_scores %IfNull% FALSE
+    dots[c("sum_coding", "eta_cor_nonmi", "prior_only", "save_scores")] <- NULL
 
-    stan_args$stan_data$eta_cor_nonmi <- eta_cor_nonmi
-    stan_args$stan_data$prior_only <- prior_only
+    stan_args$data$eta_cor_nonmi <- eta_cor_nonmi
+    stan_args$data$prior_only <- prior_only
 
     ## Select model
     if(multi) { # Multidimensional
@@ -68,7 +69,7 @@ mires <- function(formula, group, data, ...) {
     }
     pars <- c(pars, "RE_cor", "random_sigma")
 
-    stanargs$pars <- pars
+    stan_args$pars <- pars
     stanOut <- do.call(sampling, c(stan_args, dots))
 
 
@@ -149,7 +150,9 @@ mires <- function(formula, group, data, ...) {
                  factors = do.call(c, factors),
                  indicators = colnames(mm),
                  ind_spec = ind_spec,
-                 data = data.complete)
+                 data = data.complete,
+                 formula = formList)
+
     stan_data <- list(N = N,
                       J = J,
                       F = F,
@@ -159,6 +162,11 @@ mires <- function(formula, group, data, ...) {
                       J_f = ind_spec$J_f,
                       F_ind = ind_spec$F_ind
                       )
+
+    out <- list(meta = meta,
+                stan_data = stan_data
+                )
+    return(out)
 }
 
 ##' @title Get terms from formula list
@@ -235,12 +243,15 @@ mires <- function(formula, group, data, ...) {
     F <- length(formList)
     J <- ncol(mm)
 
-    J_f <- array(0, J)
+    J_f <- array(0, F)
     F_ind <- matrix(0, F, J)
 
+    formNames <- .formula_names(formList, terms = TRUE)
+    
+
     for(f in 1:F) {
-        J_f[f] <- length(formList$indicator[[f]])
-        F_ind[f, 1:J_f[f]] <- match(formList$indicator[[f]], colnames(mm))
+        J_f[f] <- length(formNames$indicator[[f]])
+        F_ind[f, 1:J_f[f]] <- match(formNames$indicator[[f]], colnames(mm))
     }
 
     out <- list(J_f = J_f, F_ind = F_ind)

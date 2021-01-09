@@ -29,6 +29,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
 
     group <- rep(1:K, each = n)
 
+    etadist <- etadist %IfNull% "zeroes"
     eta_mean <- rep(0, K)
     eta_sd <- rep(1, K)
     if(etadist == "std") {
@@ -65,7 +66,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
     random_coefs[, 1:J] <- abs(random_coefs[, 1:J])
     random <- t(t(random_coefs) - unlist(fixed))
 
-    lambda <- fixed$lambda
+    lambda <- t(fixed$lambda)
     resid_log <- fixed$resid
     nu <- fixed$nu
 
@@ -78,7 +79,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
         random[group, (2*J + 1) : (3 * J)] + # Random intercepts
         eta * random[group, 1 : J] # Random loadings
 
-    err <- matrix(rnorm(N, 0, exp(rep(1, N) %*% t(resid_log) + # Fixed resid
+    err <- matrix(rnorm(N*J, 0, exp(rep(1, N) %*% t(resid_log) + # Fixed resid
                                random[group, (J + 1) : (2 * J)] # Random resid
                                )),
                   N, J) # Matrixify
@@ -101,7 +102,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
     df <- cbind(as.data.frame(y), group = group)
 
     list(data = data,
-         params = param,
+         params = params,
          meta = meta,
          df = df)
 }
