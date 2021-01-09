@@ -22,3 +22,11 @@ samps <- as.matrix(fit$fit, pars = "random_sigma")
 dfuns <- apply(samps, 2, MIRES:::dlogspline)
 dfuns_spike <- apply(samps, 2, MIRES:::ddirichletprocess_spike, K = 100, tol_rel_obj = .01)
 dfuns_HN <- apply(samps, 2, MIRES:::ddirichletprocess_stan, K = 100, tol_rel_obj = .01)
+
+sapply(dfuns, function(x){x(0)})
+sapply(dfuns_spike, function(x){x(0)})
+
+column <- 29
+hist(samps[,column], probability = TRUE, breaks = 500)
+curve(dfuns[[column]](x), add = TRUE, col = "red", n = 500)
+curve(dfuns_spike[[column]](x), add = TRUE, col = "blue", n = 500)
