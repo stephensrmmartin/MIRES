@@ -151,5 +151,6 @@ model {
 }
 
 generated quantities {
-  corr_matrix[total_param + 2*F] RE_cor = L_to_cor(random_L);
+  /* corr_matrix[total_param + 2*F] RE_cor = L_to_cor(random_L); */
+  matrix[total_param + 2*F,total_param + 2*F] RE_cor = L_to_cor(random_L);
 }

@@ -14,6 +14,7 @@ data {
   matrix[N, J] x; // Indicator values
 
   int<lower=0, upper = 1> prior_only; // Whether to sample from prior only.
+  int eta_cor_nonmi; // Not used for unidimensional.
 }
 
 transformed data {
@@ -102,5 +103,5 @@ model {
 
 
 generated quantities {
-  corr_matrix[total] RE_cor = L_to_cor(random_L);
+  matrix[total,total] RE_cor = L_to_cor(random_L);
 }
