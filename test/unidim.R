@@ -12,7 +12,7 @@ etadist <- "std"
 
 mipattern <- list("none")
 
-d <- MIRES:::datagen_uni(J, K, n, fixed, mipattern, etadist = NULL)
+d <- MIRES:::datagen_uni(J, K, n, fixed, mipattern, etadist = etadist)
 
 ds <- d$df
 
@@ -30,3 +30,6 @@ column <- 29
 hist(samps[,column], probability = TRUE, breaks = 500)
 curve(dfuns[[column]](x), add = TRUE, col = "red", n = 500)
 curve(dfuns_spike[[column]](x), add = TRUE, col = "blue", n = 500)
+
+# Try posterior_sd fn
+funs <- MIRES:::posterior_density_funs_sigmas(fit)
