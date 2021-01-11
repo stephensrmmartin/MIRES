@@ -305,7 +305,8 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
     funs <- apply(samps, 2, dlogspline)
 
     # Which failed?
-    failed <- which(!is.function(funs))
+    failed <- sapply(funs, function(x){!is.fun(x)})
+    failed <- which(failed)
     if(length(failed) > 0) {
         warning(length(failed), " logspline density approximations failed. Using (experimental) Dirichlet Process approximations for failed chains.")
     }
