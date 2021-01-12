@@ -10,13 +10,17 @@ fixed <- list(lambda = rep(.7, J), resid_log = rep(log(sqrt(1 - .7^2)), J), nu =
 mipattern <- list("items", .4, floor(J/2))
 etadist <- "std"
 
-mipattern <- list("none")
+## mipattern <- list("none")
 
-d <- MIRES:::datagen_uni(J, K, n, fixed, mipattern, etadist = etadist)
+d <- readRDS("~/Output/MIRES/fit_gen.Rds")
+## d <- MIRES:::datagen_uni(J, K, n, fixed, mipattern, etadist = etadist)
+## saveRDS(d, "~/Output/MIRES/fit_gen.Rds")
 
 ds <- d$df
 
-fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE)
+## fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE)
+## saveRDS(fit, "~/Output/MIRES/fit.Rds")
+fit <- readRDS("~/Output/MIRES/fit.Rds")
 
 samps <- as.matrix(fit$fit, pars = "random_sigma")
 dfuns <- apply(samps, 2, MIRES:::dlogspline)
