@@ -23,17 +23,23 @@ ds <- d$df
 fit <- readRDS("~/Output/MIRES/fit.Rds")
 
 samps <- as.matrix(fit$fit, pars = "random_sigma")
-dfuns <- apply(samps, 2, MIRES:::dlogspline)
-dfuns_spike <- apply(samps, 2, MIRES:::ddirichletprocess_spike, K = 100, tol_rel_obj = .01)
-dfuns_HN <- apply(samps, 2, MIRES:::ddirichletprocess_stan, K = 100, tol_rel_obj = .01)
-
-sapply(dfuns, function(x){x(0)})
-sapply(dfuns_spike, function(x){x(0)})
-
-column <- 29
-hist(samps[,column], probability = TRUE, breaks = 500)
-curve(dfuns[[column]](x), add = TRUE, col = "red", n = 500)
-curve(dfuns_spike[[column]](x), add = TRUE, col = "blue", n = 500)
+samps[1,] <- 0 # add zero
 
 # Try posterior_sd fn
 funs <- MIRES:::posterior_density_funs_sigmas(fit)
+sapply(funs, function(x){x(0)})
+
+column <- 26
+
+fun.hn <- MIRES:::ddirichletprocess_spike(samps[,column], K = 100, tol_rel_obj = .001)
+fun.exp <- MIRES:::ddirichletprocess_stan(samps[,column], K = 100, tol_rel_obj = .001, model = "dpExp")
+fun.wei <- MIRES:::ddirichletprocess_stan(samps[,column], K = 100, tol_rel_obj = .001, model = "dpWeibull")
+fun.hn2 <- MIRES:::ddirichletprocess_stan(samps[,column], K = 100, tol_rel_obj = .001)
+
+hist(samps[,column], probability = TRUE, breaks = 200)
+curve(funs[[column]](x), add = TRUE, col = "red", n = 1000, 0, .2)
+curve(fun.hn, add = TRUE, col = "green", n = 1000, 0, .2)
+curve(fun.exp, add = TRUE, col = "blue",lty = "dashed", n = 1000, 0, .2)
+curve(fun.wei, add = TRUE, col = "blue",lty = "dotted", n = 1000, 0, .2)
+curve(fun.hn2, add = TRUE, col = "blue", n = 1000, 0, .2)
+
