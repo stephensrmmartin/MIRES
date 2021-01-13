@@ -24,7 +24,8 @@ Imports:
     parallel (>= 3.4.0),
     mvtnorm (>= 1.0),
     dirichletprocess (>= 0.4.0),
-    truncnorm (>= 1.0)
+    truncnorm (>= 1.0),
+    pracma (>= 2.2.9)
 LinkingTo: 
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),

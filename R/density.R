@@ -282,4 +282,38 @@ predict_DP <- function(x, fit, K, pi = "pi", dens, params, R_params, samps = FAL
         return(pxs)
     }
 }
+##' Computes the implied densities of random effect differences given HMRE prior.
+##'
+##' The HMRE prior for the RE-SD is \math{\int N^+(\sigma_p | exp(h_p))LN(h_p | 4\mu, \sqrt{4}\sigma)dh_p}.
+##' The random effects are distributed as \math{u_{k,p} \sim N(0, \sigma_p)}.
+##' The implied prior is therefore \math{u_{k,p} - u_{\lnot k, p} \sim N(0, \sqrt{2}\sigma)}.
+##' @title Implied density for pairwise differences given HMRE prior.
+##' @param x Numeric. Difference in random effects.
+##' @param mu Numeric. HMRE Prior location.
+##' @param sigma Numeric. (Default: 1; must be > 0). HMRE prior scale.
+##' @return Numeric vector.
+##' @author Stephen R. Martin
+##' @keywords internal
+dhmre_pairwise <- function(x, mu = 0, sigma = 1) {
 
+    jointprior <- function(x, resd, mu, sigma) {
+        dnorm(x, 0, sqrt(2) * resd) * dhmre(resd, mu, sigma)
+    }
+    margprior <- function(x, mu, sigma) {
+        pracma::quadinf(jointprior, xa = 0, xb = Inf, x = x, mu = mu, sigma = sigma)[["Q"]]
+        ## suppressMessages(pracma::integral(jointprior, xmin = 0, xmax = Inf, x = x, mu = mu, sigma = sigma))
+        ## integrate(jointprior, lower = 0, upper = Inf, x = x, mu = mu, sigma = sigma, stop.on.error=TRUE)
+    }
+    margprior <- Vectorize(margprior)
+
+    ## as.numeric(margprior(x, mu, sigma)["value",])
+    margprior(x, mu, sigma)
+    
+}
+
+rhmre_pairwise <- function(n, mu = 0, sigma = 1) {
+    resd <- rhmre(n, mu, sigma)
+    us <- t(sapply(resd, function(x){rnorm(2, 0, sqrt(2) * x)}))
+    ds <- us[,1] - us[,2]
+    ds
+}
