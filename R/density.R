@@ -287,6 +287,10 @@ predict_DP <- function(x, fit, K, pi = "pi", dens, params, R_params, samps = FAL
 ##' The HMRE prior for the RE-SD is \math{\int N^+(\sigma_p | exp(h_p))LN(h_p | 4\mu, \sqrt{4}\sigma)dh_p}.
 ##' The random effects are distributed as \math{u_{k,p} \sim N(0, \sigma_p)}.
 ##' The implied prior is therefore \math{u_{k,p} - u_{\lnot k, p} \sim N(0, \sqrt{2}\sigma)}.
+##' Note that there is a singularity at 0, because the integrand at sigma = 0 is an infinite spike.
+##' We currently integrate (using a change of variables) starting at machine precision-zero. Consider this the approximation of the limit as we approach 0 positively.
+##' This is therefore divergent when assessed at a difference of zero, due to the RESD taking on a zero value (and an infinite function value).
+##' This is expected, as the limit of a Gaussian as sigma -> 0 is the Dirac delta function.
 ##' @title Implied density for pairwise differences given HMRE prior.
 ##' @param x Numeric. Difference in random effects.
 ##' @param mu Numeric. HMRE Prior location.
