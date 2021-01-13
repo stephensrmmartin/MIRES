@@ -1,4 +1,3 @@
-
 ##' For each RE-SD, approximates the marginal posterior density from MCMC samples for use in BF calculations.
 ##'
 ##' Starts by computing (lower-bounded) logspline approximations.
