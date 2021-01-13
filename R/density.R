@@ -299,10 +299,24 @@ dhmre_pairwise <- function(x, mu = 0, sigma = 1) {
     jointprior <- function(x, resd, mu, sigma) {
         dnorm(x, 0, sqrt(2) * resd) * dhmre(resd, mu, sigma)
     }
+    g <- function(u) {
+        0 + u / (1 - u)
+    }
+    g_jacobian <- function(u) {
+        1 / ((1 - u)^2)
+    }
+    jointprior_CoV <- function(x, u, mu, sigma) {
+        resd <- g(u)
+        dnorm(x, 0, sqrt(2) * resd) * dhmre(resd, mu, sigma) * g_jacobian(u)
+    }
     margprior <- function(x, mu, sigma) {
-        pracma::quadinf(jointprior, xa = 0, xb = Inf, x = x, mu = mu, sigma = sigma)[["Q"]]
-        ## suppressMessages(pracma::integral(jointprior, xmin = 0, xmax = Inf, x = x, mu = mu, sigma = sigma))
-        ## integrate(jointprior, lower = 0, upper = Inf, x = x, mu = mu, sigma = sigma, stop.on.error=TRUE)
+        #### Untransformed space; 
+        ## pracma::quadinf(jointprior, xa = 0, xb = Inf, x = x, mu = mu, sigma = sigma)[["Q"]]
+        ## integrate(jointprior, lower = 0, upper = Inf, x = x, mu = mu, sigma = sigma, stop.on.error=TRUE)[["value"]]
+        #### Using a change of variables g(0) -> 0; g(1) -> Inf
+        ## integrate(jointprior_CoV, lower = .Machine$double.eps, upper = 1, x = x, mu = mu, sigma = sigma, stop.on.error=FALSE, subdivisions = 1000)[["value"]]
+        ## pracma::quadinf(jointprior_CoV, xa = 0, xb = 1, x = x, mu = mu, sigma = sigma)[["Q"]]
+        cubature::cubintegrate(jointprior_CoV, .Machine$double.eps, 1, fDim = 1, method = "hcubature", x = x, mu = mu, sigma = sigma)[["integral"]]
     }
     margprior <- Vectorize(margprior)
 
