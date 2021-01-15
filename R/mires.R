@@ -52,6 +52,7 @@ mires <- function(formula, group, data, ...) {
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
+                            multi,
                             sum_coding,
                             eta_cor_nonmi,
                             prior_only,
