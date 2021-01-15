@@ -7,3 +7,26 @@
         return(object)
     }
 }
+
+nlist <- function(...) {
+    mc <- match.call()
+    out <- list(...)
+
+    not_named <- is.null(names(out))
+    is_named <- if(not_named) {
+                    FALSE
+                } else {
+                    nzchar(names(out))
+                }
+
+    args <- as.character(mc)[-1] # Not the fn name.
+
+    if(not_named) {
+        names(out) <- args
+    } else {
+        names(out)[!is_named] <- args[!is_named]
+    }
+
+    return(out)
+
+}
