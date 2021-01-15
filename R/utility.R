@@ -30,3 +30,10 @@ nlist <- function(...) {
     return(out)
 
 }
+
+prob_to_probs <- function(prob) {
+    lower <- (1 - prob) / 2
+    upper <- 1 - lower
+    probs <- c(lower, upper)
+    return(probs)
+}

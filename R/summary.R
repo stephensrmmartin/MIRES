@@ -44,3 +44,25 @@ print.summary.mires <- function(x, ...) {
     ## cat(as.character(x))
     .newline()
 }
+
+# Summary-specific helpers
+
+##' @title Compute Highest Posterior Density intervals.
+##' @param samps MCMC sample matrix.
+##' @param prob Numeric in (0,1).
+##' @param add_zero Logical (Default: FALSE) - Whether to add zero to samples. Useful for unidirectional effects.
+##' @return Matrix of HDIs.
+##' @author Stephen Martin
+##' @keywords internal
+##' @import HDInterval
+.hdi <- function(samps, prob, add_zero = FALSE) {
+    credMass <- prob
+    if(add_zero) {
+        samps <- rbind(0, samps)
+    }
+
+    hdis <- t(hdi(samps, credMass = credMass))
+    colnames(hdis) <- paste0(c("L", "U"), prob*100)
+
+    return(hdis)
+}
