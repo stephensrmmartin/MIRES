@@ -43,7 +43,15 @@ mires <- function(formula, group, data, ...) {
     eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE
     prior_only <- dots$prior_only %IfNull% FALSE
     save_scores <- dots$save_scores %IfNull% FALSE
-    dots[c("sum_coding", "eta_cor_nonmi", "prior_only", "save_scores")] <- NULL
+    hmre <- dots$hmre <- dots$hmre, %IfNull% TRUE
+    dots[c("sum_coding",
+        "eta_cor_nonmi",
+        "prior_only",
+        "save_scores",
+        "hm")] <- NULL
+
+    # Save config stuff
+    d$meta <- c(d$meta, nlist(sum_coding, eta_cor_nonmi, prior_only, save_scores, hmre))
 
     stan_args$data$eta_cor_nonmi <- eta_cor_nonmi
     stan_args$data$prior_only <- prior_only
@@ -71,7 +79,6 @@ mires <- function(formula, group, data, ...) {
 
     stan_args$pars <- pars
     stanOut <- do.call(sampling, c(stan_args, dots))
-
 
     out <- list()
     out$meta <- d$meta
