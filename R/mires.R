@@ -48,7 +48,7 @@ mires <- function(formula, group, data, ...) {
         "eta_cor_nonmi",
         "prior_only",
         "save_scores",
-        "hm")] <- NULL
+        "hmre")] <- NULL
 
     # Save config stuff
     d$meta <- c(d$meta, nlist(sum_coding, eta_cor_nonmi, prior_only, save_scores, hmre))
