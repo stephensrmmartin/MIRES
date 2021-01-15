@@ -1,3 +1,9 @@
+##' @title Print function for mires objects.
+##' @param x mires object.
+##' @param ... Not used.
+##' @return NULL
+##' @author Stephen R. Martin
+##' @export
 print.mires <- function(x, ...) {
     .sep()
     .writeLine("MIRES model object")

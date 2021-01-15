@@ -254,7 +254,7 @@ mires <- function(formula, group, data, ...) {
 ##' @title Generates indicator spec list.
 ##' @param formList 
 ##' @param mm 
-##' @return 
+##' @return List containing J_f (Indicators per factor; numeric vector) and F_ind (FxJ Numeric Matrix, where F_ind[f,1:J_f] gives the column indices of the model matrix corresponding to factor f.)
 ##' @author Stephen R. Martin
 ##' @keywords internal
 .indicator_spec <- function(formList, mm) {

@@ -42,10 +42,6 @@ rhmre <- function(n, mu = 0, sigma = 1) {
     abs(rnorm(n, 0, hmre))
 }
 
-# TODO : HDInterval method [and add a 0 to each MCMC sample (or just RE-SDs)]
-
-# TODO : Add pairwise-hmre density estimator; implied prior over hmre prior of u[k] - u[not_k]
-
 ##' @title Create logspline-based density function.
 ##' @param mcmc MCMC samples.
 ##' @param lbound Integer (Default: 0).
@@ -284,9 +280,9 @@ predict_DP <- function(x, fit, K, pi = "pi", dens, params, R_params, samps = FAL
 }
 ##' Computes the implied densities of random effect differences given HMRE prior.
 ##'
-##' The HMRE prior for the RE-SD is \math{\int N^+(\sigma_p | exp(h_p))LN(h_p | 4\mu, \sqrt{4}\sigma)dh_p}.
-##' The random effects are distributed as \math{u_{k,p} \sim N(0, \sigma_p)}.
-##' The implied prior is therefore \math{u_{k,p} - u_{\lnot k, p} \sim N(0, \sqrt{2}\sigma)}.
+##' The HMRE prior for the RE-SD is \eqn{\int N^+(\sigma_p | exp(h_p))LN(h_p | 4\mu, \sqrt{4}\sigma)dh_p}.
+##' The random effects are distributed as \eqn{u_{k,p} \sim N(0, \sigma_p)}.
+##' The implied prior is therefore \eqn{u_{k,p} - u_{\lnot k, p} \sim N(0, \sqrt{2}\sigma)}.
 ##' Note that there is a singularity at 0, because the integrand at sigma = 0 is an infinite spike.
 ##' We currently integrate (using a change of variables) starting at machine precision-zero. Consider this the approximation of the limit as we approach 0 positively.
 ##' This is therefore divergent when assessed at a difference of zero, due to the RESD taking on a zero value (and an infinite function value).
