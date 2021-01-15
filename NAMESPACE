@@ -2,6 +2,7 @@
 
 export(mires)
 import(Formula)
+import(HDInterval)
 import(Rcpp)
 import(dirichletprocess)
 import(logspline)
