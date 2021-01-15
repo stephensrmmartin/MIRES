@@ -1,7 +1,7 @@
 ##' @title Print function for mires objects.
 ##' @param x mires object.
 ##' @param ... Not used.
-##' @return NULL
+##' @return x (Invisibly)
 ##' @author Stephen R. Martin
 ##' @export
 print.mires <- function(x, ...) {
@@ -22,6 +22,8 @@ print.mires <- function(x, ...) {
     .writeLine("\t", "Latent Mean and Variance Identification:", ifelse(x$meta$sum_coding, "Sum-to-zero, product-to-one.", "Zero-centered random effects."))
     .writeLine("\t", "Hierarchical inclusion model:", ifelse(x$meta$hmre, "Yes", "No"))
     .writeLine("\t", "Latent Scores Saved:", ifelse(x$meta$save_scores, "Yes", "No"))
+
+    invisible(x)
 }
 
 summary.mires <- function(object, prob = .95, ...) {

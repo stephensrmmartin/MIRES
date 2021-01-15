@@ -11,6 +11,9 @@
 
 \item{...}{Not used.}
 }
+\value{
+x (Invisibly)
+}
 \description{
 Print function for mires objects.
 }
