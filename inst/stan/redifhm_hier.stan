@@ -35,7 +35,8 @@ parameters {
   matrix[K, total + 2] random_z; // 3J Vectors of uncor, std. REs.
   cholesky_factor_corr[total + 2] random_L; // Chol. factor of RE correlations
   // TODO: Try this with estimating the sigma for mean and logsd, like in the multi model.
-  vector<lower=0>[total] lambda_resid_nu_random_sigma; // SD of REs: TODO: Should sigma for mean and logsd be estimated, or set to 1? Currently, assuming eta_mean and log(eta_sd) ~ N(0,1)
+  vector<lower=0>[total] random_sigma; // SD of REs: TODO: Should sigma for mean and logsd be estimated, or set to 1? Currently, assuming eta_mean and log(eta_sd) ~ N(0,1)
+  vector<lower=0>[2] eta_random_sigma; // If estimating sigm, rather than setting to 1,1.
 
   // Latent
   vector[N] eta_z; // N-length vector of latent factor scores; std.
@@ -49,8 +50,9 @@ parameters {
 }
 
 transformed parameters {
-  vector<lower=0>[total + 2] random_sigma = append_row(lambda_resid_nu_random_sigma, [1.0, 1.0]');
-  matrix[K, total + 2] random = z_to_random(random_z, random_sigma, random_L);
+  /* vector<lower=0>[total + 2] random_sigma_all = append_row(random_sigma, [1.0, 1.0]'); */
+  vector<lower=0>[total + 2] random_sigma_all = append_row(random_sigma, eta_random_sigma);
+  matrix[K, total + 2] random = z_to_random(random_z, random_sigma_all, random_L);
   matrix[K, J] lambda_random = random[, lamResNu_indices[1]];
   matrix[K, J] resid_random = random[, lamResNu_indices[2]];
   matrix[K, J] nu_random = random[, lamResNu_indices[3]];
@@ -91,7 +93,10 @@ model {
   hm_lambda ~ std_normal();
 
   // Hierarchical inclusion
-  lambda_resid_nu_random_sigma ~ normal(0, hm_hat);
+  random_sigma ~ normal(0, hm_hat);
+
+  // Eta-mean and Eta-sigma RE SDs.
+  eta_random_sigma ~ normal(0,1);
 
 
   // Likelihood
@@ -103,5 +108,5 @@ model {
 
 
 generated quantities {
-  matrix[total,total] RE_cor = L_to_cor(random_L);
+  matrix[total,total] RE_cor = L_to_cor(random_L)[1:total,1:total]; // Subsetting to exclude eta_mean/sd random effect correlations..
 }
