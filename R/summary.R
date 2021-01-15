@@ -11,7 +11,7 @@ print.mires <- function(x, ...) {
 
     .writeLine("Specification:")
     for(f in 1:x$meta$F) {
-        print(x$meta$formula[[f]])
+        .writeLine(.printFormula(x$meta$formula[[f]]))
     }
 
     .newline()
@@ -49,6 +49,10 @@ print.summary.mires <- function(x, ...) {
     do.call(cat, dots)
     ## cat(as.character(x))
     .newline()
+}
+
+.printFormula <- function(f) {
+    deparse1(f)
 }
 
 # Summary-specific helpers
