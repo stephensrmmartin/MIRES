@@ -50,8 +50,15 @@ mires <- function(formula, group, data, ...) {
         "save_scores",
         "hmre")] <- NULL
 
-    # Save config stuff
-    d$meta <- c(d$meta, nlist(sum_coding, eta_cor_nonmi, prior_only, save_scores, hmre))
+    # Save config options to metadata list
+    d$meta <- c(d$meta, nlist(
+                            sum_coding,
+                            eta_cor_nonmi,
+                            prior_only,
+                            save_scores,
+                            hmre
+                        )
+                )
 
     stan_args$data$eta_cor_nonmi <- eta_cor_nonmi
     stan_args$data$prior_only <- prior_only
@@ -80,10 +87,9 @@ mires <- function(formula, group, data, ...) {
     stan_args$pars <- pars
     stanOut <- do.call(sampling, c(stan_args, dots))
 
-    out <- list()
-    out$meta <- d$meta
-    out$fit <- stanOut
-    out$stan_data <- d$stan_data
+    out <- list(meta = d$meta,
+                fit = stanOut,
+                stan_data = d$stan_data)
 
     class(out) <- "mires"
     return(out)
@@ -135,7 +141,12 @@ mires <- function(formula, group, data, ...) {
     group_data_numeric <- as.numeric(as.factor(group_data))
     group_k <- length(unique(group_data_numeric))
 
-    group <- list(name = group_string, data = group_data, numeric = group_data_numeric, K = group_k)
+    group <- list(
+        name = group_string,
+        data = group_data,
+        numeric = group_data_numeric,
+        K = group_k
+    )
 
     # Model matrix
     mm <- model.matrix(RHS, data.complete)[, -1] # Remove intercept
