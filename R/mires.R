@@ -43,12 +43,16 @@ mires <- function(formula, group, data, ...) {
     eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE
     prior_only <- dots$prior_only %IfNull% FALSE
     save_scores <- dots$save_scores %IfNull% FALSE
-    hmre <- dots$hmre <- dots$hmre %IfNull% TRUE
+    hmre <- dots$hmre %IfNull% TRUE
+    hmre_mu <- dots$hmre_mu %IfNull% 0
+    hmre_scale <- dots$hmre_scale %IfNull% 1
     dots[c("sum_coding",
         "eta_cor_nonmi",
         "prior_only",
         "save_scores",
-        "hmre")] <- NULL
+        "hmre",
+        "hmre_mu",
+        "hmre_scale")] <- NULL
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
@@ -63,6 +67,8 @@ mires <- function(formula, group, data, ...) {
 
     stan_args$data$eta_cor_nonmi <- eta_cor_nonmi
     stan_args$data$prior_only <- prior_only
+    stan_args$data$hmre_mu <- hmre_mu
+    stan_args$data$hmre_scale <- hmre_scale
 
     ## Select model
     if(multi) { # Multidimensional

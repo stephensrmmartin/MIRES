@@ -20,6 +20,8 @@ data {
   // Options
   int<lower=0, upper=1> prior_only; // Whether to sample from prior only.
   int<lower=0, upper=1> eta_cor_nonmi; // Whether correlations between factors 1:F is not invariant across 1:K groups.
+  real hmre_mu;
+  real<lower=0> hmre_scale;
   
 }
 
@@ -133,10 +135,10 @@ model {
     }
   }
 
-  hm_tau ~ std_normal();
-  hm_param ~ std_normal();
-  hm_item ~ std_normal();
-  hm_lambda ~ std_normal();
+  hm_tau ~ normal(hmre_mu, hmre_scale);
+  hm_param ~ normal(hmre_mu, hmre_scale);
+  hm_item ~ normal(hmre_mu, hmre_scale);
+  hm_lambda ~ normal(hmre_mu, hmre_scale);
 
   // Hierarchical inclusion
   random_sigma[1:total_param] ~ normal(0, hm_hat);
