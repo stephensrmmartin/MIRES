@@ -34,5 +34,5 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
 }
 
 savage_dickey <- function(posterior_dens_fun, prior_dens_fun, ...) {
-    posterior_dens_fun(0) / do.call(prior_dens_fun, ...)
+    posterior_dens_fun(0) / prior_dens_fun(...)
 }
