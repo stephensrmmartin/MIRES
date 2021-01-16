@@ -1,7 +1,7 @@
 library(rstan)
 library(MIRES)
 
-set.seed(13)
+set.seed(14)
 J <- 10
 K <- 20
 n <- 40
