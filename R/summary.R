@@ -26,7 +26,14 @@ print.mires <- function(x, ...) {
     invisible(x)
 }
 
-summary_mires <- function(object, prob = .95, ...) {
+##' @title Summary method for mires object.
+##' @param object mires object.
+##' @param prob Numeric (Default = .95). 
+##' @param ... Not used.
+##' @return summary.mires object. List of meta data and summary. Summary is list of summary tables for all non-random parameters.
+##' @author Stephen R. Martin
+##' @export
+summary.mires <- function(object, prob = .95, ...) {
     meta <- object$meta
     meta$prob <- prob
 

@@ -2,6 +2,7 @@
 
 S3method(print,mires)
 export(mires)
+export(summary.mires)
 import(Formula)
 import(HDInterval)
 import(Rcpp)
