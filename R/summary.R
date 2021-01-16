@@ -28,7 +28,7 @@ print.mires <- function(x, ...) {
 
 ##' @title Summary method for mires object.
 ##' @param object mires object.
-##' @param prob Numeric (Default = .95). 
+##' @param prob Numeric (Default = .95). Probability mass to be contained in the highest posterior density interval.
 ##' @param ... Not used.
 ##' @return summary.mires object. List of meta data and summary. Summary is list of summary tables for all non-random parameters.
 ##' @author Stephen R. Martin
@@ -96,6 +96,9 @@ summary.mires <- function(object, prob = .95, ...) {
     resd[, "Factor"] <- object$meta$factors[resd[,"Factor"]]
     ## Reorder
     resd <- reorder_columns(resd, c("param", "Parameter", "Item", "Factor"))
+
+    ## TODO Bayes factors
+    resd_dfuns <- posterior_density_funs_sigmas(object, add_zero = TRUE)
 
     ###############
     # Regularizer #
