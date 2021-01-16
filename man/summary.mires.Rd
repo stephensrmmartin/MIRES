@@ -4,7 +4,7 @@
 \alias{summary.mires}
 \title{Summary method for mires object.}
 \usage{
-summary.mires(object, prob = 0.95, ...)
+\method{summary}{mires}(object, prob = 0.95, ...)
 }
 \arguments{
 \item{object}{mires object.}

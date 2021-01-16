@@ -32,6 +32,7 @@ print.mires <- function(x, ...) {
 ##' @param ... Not used.
 ##' @return summary.mires object. List of meta data and summary. Summary is list of summary tables for all non-random parameters.
 ##' @author Stephen R. Martin
+##' @method summary mires
 ##' @export
 summary.mires <- function(object, prob = .95, ...) {
     meta <- object$meta
