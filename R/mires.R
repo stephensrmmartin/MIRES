@@ -61,7 +61,9 @@ mires <- function(formula, group, data, ...) {
                             eta_cor_nonmi,
                             prior_only,
                             save_scores,
-                            hmre
+                            hmre,
+                            hmre_mu,
+                            hmre_scale
                         )
                 )
 
