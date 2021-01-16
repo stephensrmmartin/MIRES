@@ -9,7 +9,7 @@ summary.mires(object, prob = 0.95, ...)
 \arguments{
 \item{object}{mires object.}
 
-\item{prob}{Numeric (Default = .95).}
+\item{prob}{Numeric (Default = .95). Probability mass to be contained in the highest posterior density interval.}
 
 \item{...}{Not used.}
 }

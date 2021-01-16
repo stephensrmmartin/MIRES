@@ -99,6 +99,10 @@ summary.mires <- function(object, prob = .95, ...) {
 
     ## TODO Bayes factors
     resd_dfuns <- posterior_density_funs_sigmas(object, add_zero = TRUE)
+    bf01 <- sapply(resd_dfuns, function(f) {
+        savage_dickey(f, dhmre, x = 0, mu = object$meta$hmre_mu, sigma = object$meta$hmre_scale)
+    })
+    resd[,"BF01"] <- bf01
 
     ###############
     # Regularizer #
