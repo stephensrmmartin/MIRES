@@ -26,8 +26,112 @@ print.mires <- function(x, ...) {
     invisible(x)
 }
 
-summary.mires <- function(object, prob = .95, ...) {
-    
+summary_mires <- function(object, prob = .95, ...) {
+    meta <- object$meta
+    meta$prob <- prob
+
+    #################
+    # Fixed effects #
+    #################
+
+    ## Loadings (Assumes Univariate due to loadings only being a vector, not a matrix!!!)
+    lambda <- .summary_table(object,
+                            pars = "lambda",
+                            prob,
+                            labs = "Item",
+                            Item = object$meta$indicators)
+
+    ## Resid
+    resid <- .summary_table(object,
+                            pars = "resid_log",
+                            prob,
+                            transform = function(x){exp(x)},
+                            labs = "Item",
+                            Item = object$meta$indicators)
+    ## Nu
+    nu <- .summary_table(object,
+                         pars = "nu",
+                         prob,
+                         labs = "Item",
+                         Item = object$meta$indicators)
+
+    ##########
+    # RE-SDs #
+    ##########
+
+    # RE-SDs (Assumes Univariate due to loadings only being a vector, not a matrix!!!)
+    ## Get loading-codes in row-major order for future proofing: "j_f"
+    lambda_enum <- with(object$meta$ind_spec, {
+        r <- lapply(1:object$meta$F, function(x){
+            paste0(F_ind[x, 1:J_f[x]], "__SEP__", x)
+        })
+        unlist(r)
+    })
+    resd_labs <- c(paste0("lambda__SEP__", lambda_enum),
+                   paste0("resid_log__SEP__", 1:object$meta$J),
+                   paste0("nu__SEP__", 1:object$meta$J)
+                   )
+    resd <- .summary_table(object,
+                           pars = "random_sigma",
+                           prob,
+                           add_zero = TRUE,
+                           labs = "Parameter",
+                           Parameter = resd_labs)
+
+    # Munge the __SEP__ values
+    param_split <- strsplit(resd[, "Parameter"], "__SEP__")
+    resd[, "Parameter"] <- sapply(param_split, function(x) {x[1]})
+    resd[, "Item"] <- as.numeric(sapply(param_split, function(x) {x[2]}))
+    resd[, "Factor"] <- as.numeric(sapply(param_split, function(x) {x[3]}))
+    ## Relabel
+    resd[resd$Parameter == "resid_log", "Parameter"] <- "resid"
+    resd[, "Item"] <- object$meta$indicators[resd[,"Item"]]
+    resd[, "Factor"] <- object$meta$factors[resd[,"Factor"]]
+    ## Reorder
+    resd <- reorder_columns(resd, c("param", "Parameter", "Item", "Factor"))
+
+    ###############
+    # Regularizer #
+    ###############
+
+    hm <- .summary_table(object,
+                         pars = "hm_tau",
+                         prob,
+                         labs = "Parameter")
+    hm_param <- .summary_table(object,
+                               pars = "hm_param",
+                               prob,
+                               labs = "Parameter",
+                               Parameter = c("Loading", "Resid", "Intercept"))
+    hm_item <- .summary_table(object,
+                              pars = "hm_item",
+                              prob,
+                              labs = "Item",
+                              Item = object$meta$indicator)
+    hm_lambda <- .summary_table(object,
+                                pars = "hm_lambda",
+                                prob,
+                                labs = "RE"
+                                )
+    hm_lambda[,c("Parameter", "Item", "Factor")] <- resd[,c("Parameter", "Item", "Factor")]
+    hm_lambda <- reorder_columns(hm_lambda, c("param", "RE", "Parameter", "Item", "Factor"))
+
+    ##########
+    # Return #
+    ##########
+
+    out <- nlist(meta)
+    out$summary <- nlist(lambda,
+                 resid,
+                 nu,
+                 resd,
+                 hm,
+                 hm_param,
+                 hm_item,
+                 hm_lambda)
+
+    class(out) <- "summary.mires"
+    out
 }
 
 print.summary.mires <- function(x, ...) {
@@ -77,4 +181,28 @@ print.summary.mires <- function(x, ...) {
     colnames(hdis) <- paste0(c("L", "U"), prob*100)
 
     return(hdis)
+}
+
+.summary_table <- function(mires, pars, prob, add_zero = FALSE, transform = NULL, ...) {
+    mcmc <- as.matrix(mires$fit, pars = pars)
+    mcmc_array <- as.array(mires$fit, pars = pars)
+
+    if(!is.null(transform)) {
+        mcmc <- transform(mcmc)
+        mcmc_array <- transform(mcmc_array)
+    }
+
+    if(add_zero) {
+        mcmc <- rbind(mcmc, 0)
+    }
+
+    Mean <- colMeans(mcmc)
+    SD <- apply(mcmc, 2, sd)
+    Rhat <- apply(mcmc_array, 3, rstan::Rhat)
+    hdis <- .hdi(mcmc, prob, add_zero = FALSE)
+
+    out <- data.frame(Mean, SD, hdis, Rhat)
+    out <- cbind(tidy_stanpars(rownames(out), ...), out)
+    rownames(out) <- NULL
+    return(out)
 }
