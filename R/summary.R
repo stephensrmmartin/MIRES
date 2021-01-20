@@ -35,8 +35,10 @@ print.mires <- function(x, ...) {
 ##' @method summary mires
 ##' @export
 summary.mires <- function(object, prob = .95, ...) {
+    dots <- list(...)
     meta <- object$meta
     meta$prob <- prob
+    meta$digits <- dots$digits %IfNull% 3
 
     #################
     # Fixed effects #
