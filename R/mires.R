@@ -44,8 +44,8 @@ mires <- function(formula, group, data, ...) {
     prior_only <- dots$prior_only %IfNull% FALSE
     save_scores <- dots$save_scores %IfNull% FALSE
     hmre <- dots$hmre %IfNull% TRUE
-    hmre_mu <- dots$hmre_mu %IfNull% 0
-    hmre_scale <- dots$hmre_scale %IfNull% 1
+    hmre_mu <- dots$hmre_mu %IfNull% 0.0
+    hmre_scale <- dots$hmre_scale %IfNull% .25
     dots[c("sum_coding",
         "eta_cor_nonmi",
         "prior_only",

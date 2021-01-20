@@ -22,6 +22,9 @@ print.mires <- function(x, ...) {
     .writeLine("\t", "Latent Mean and Variance Identification:", ifelse(x$meta$sum_coding, "Sum-to-zero, product-to-one.", "Zero-centered random effects."))
     .writeLine("\t", "Hierarchical inclusion model:", ifelse(x$meta$hmre, "Yes", "No"))
     .writeLine("\t", "Latent Scores Saved:", ifelse(x$meta$save_scores, "Yes", "No"))
+    if(x$meta$hmre) {
+        .writeLine("\t", "Inclusion Model Prior Params:", x$meta$hmre_mu, ", ", x$meta$hmre_scale)
+    }
 
     invisible(x)
 }
