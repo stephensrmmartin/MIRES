@@ -152,8 +152,23 @@ summary.mires <- function(object, prob = .95, ...) {
     out
 }
 
+##' @title Print method for MIRES summary objects.
+##' @param x summary.mires object.
+##' @param ... Not used.
+##' @return NULL
+##' @author Stephen Martin
+##' @export
 print.summary.mires <- function(x, ...) {
-    
+    dots <- list(...)
+    digits <- dots$digits %IfNull% x$meta$digits
+
+    # Print what print.mires does; only needs meta.
+    print.mires(x)
+    .sep()
+
+    # Fixed effects
+    ## Loadings (Assumes unidimensional!)
+    .print_sumtab(x$summary$lambda, digits, "param")
 }
 
 
