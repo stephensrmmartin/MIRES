@@ -77,9 +77,9 @@ summary.mires <- function(object, prob = .95, less_than = .1, ...) {
         })
         unlist(r)
     })
-    resd_labs <- c(paste0("lambda__SEP__", lambda_enum),
-                   paste0("resid_log__SEP__", 1:object$meta$J),
-                   paste0("nu__SEP__", 1:object$meta$J)
+    resd_labs <- c(paste0("Loading__SEP__", lambda_enum),
+                   paste0("Residual SD__SEP__", 1:object$meta$J),
+                   paste0("Intercept__SEP__", 1:object$meta$J)
                    )
     resd <- .summary_table(object,
                            pars = "random_sigma",
@@ -179,8 +179,32 @@ print.summary.mires <- function(x, ...) {
     .sep()
 
     # Fixed effects
+    .writeLine("Fixed Effects")
+    .sep()
     ## Loadings (Assumes unidimensional!)
+    .writeLine("Loadings")
     .print_sumtab(x$summary$lambda, digits, "param")
+    .newline()
+
+    ## Residual SDs
+    .writeLine("Residual Standard Deviations (Unlogged Scale)")
+    .print_sumtab(x$summary$resid, digits, "param")
+    .newline()
+
+    ## Intercepts
+    .writeLine("Intercepts")
+    .print_sumtab(x$summary$nu, digits, "param")
+    .newline()
+
+    ## Random Effect SDs
+    .sep()
+    .writeLine("Measurement Invariance Assessment")
+    .sep()
+    .writeLine("Random Effect Standard Deviations (Unlogged Scale)")
+
+    .print_sumtab(x$summary$resd, digits, "param")
+
+    invisible(x)
 }
 
 
@@ -250,4 +274,20 @@ print.summary.mires <- function(x, ...) {
     out <- cbind(tidy_stanpars(rownames(out), ...), out)
     rownames(out) <- NULL
     return(out)
+}
+
+.print_sumtab <- function(x, digits, drop_cols = NULL) {
+    which_dc <- match(drop_cols, colnames(x))
+    cols <- 1:ncol(x)
+    if(length(which_dc) > 0) {
+        cols <- (1:ncol(x))[-which_dc]
+    }
+    x <- x[, cols]
+
+    # Round, because format and print digits are confusing.
+    numeric_cols <- sapply(x, is.numeric)
+    x[, numeric_cols] <- round(x[, numeric_cols], digits)
+
+    # Print
+    print.data.frame(x, row.names = FALSE, na.print = "")
 }
