@@ -111,10 +111,11 @@ summary.mires <- function(object, prob = .95, ...) {
     # Regularizer #
     ###############
 
-    hm <- .summary_table(object,
+    hm <- suppressWarnings(.summary_table(object,
                          pars = "hm_tau",
                          prob,
                          labs = "Parameter")
+                         )
     hm_param <- .summary_table(object,
                                pars = "hm_param",
                                prob,
