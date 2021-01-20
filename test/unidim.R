@@ -19,6 +19,8 @@ d <- readRDS("~/Output/MIRES/fit_gen.Rds")
 ds <- d$df
 
 ## fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE)
+## fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25)
+## fit_prior <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = TRUE, hmre_mu = 0, hmre_scale = .25)
 ## saveRDS(fit, "~/Output/MIRES/fit.Rds")
 fit <- readRDS("~/Output/MIRES/fit.Rds")
 
