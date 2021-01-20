@@ -170,7 +170,7 @@ summary.mires <- function(object, prob = .95, less_than = .1, ...) {
 ##' @title Print method for MIRES summary objects.
 ##' @param x summary.mires object.
 ##' @param ... Not used.
-##' @return NULL
+##' @return x (Invisibly)
 ##' @author Stephen Martin
 ##' @export
 print.summary.mires <- function(x, ...) {
