@@ -34,7 +34,7 @@ print.mires <- function(x, ...) {
 ##' @author Stephen R. Martin
 ##' @method summary mires
 ##' @export
-summary.mires <- function(object, prob = .95, ...) {
+summary.mires <- function(object, prob = .95, less_than = .1, ...) {
     dots <- list(...)
     meta <- object$meta
     meta$prob <- prob
@@ -100,12 +100,24 @@ summary.mires <- function(object, prob = .95, ...) {
     ## Reorder
     resd <- reorder_columns(resd, c("param", "Parameter", "Item", "Factor"))
 
-    ## TODO Bayes factors
+    ## Bayes factors
     resd_dfuns <- posterior_density_funs_sigmas(object, add_zero = TRUE)
     bf01 <- sapply(resd_dfuns, function(f) {
         savage_dickey(f, dhmre, x = 0, mu = object$meta$hmre_mu, sigma = object$meta$hmre_scale)
     })
     resd[,"BF01"] <- bf01
+    resd[,"BF10"] <- 1 / bf01
+
+    ## Less_than tests
+    pr_less_than <- apply(as.matrix(object$fit, pars = "random_sigma"), 2, prob_less_than,
+                          less_than = less_than)
+    bflts <- apply(as.matrix(object$fit, pars = "random_sigma"), 2, bflt,
+                   less_than = less_than,
+                   prior_cumul_fun = phmre,
+                   mu = object$meta$hmre_mu,
+                   sigma = object$meta$hmre_scale)
+    resd[,paste0("Pr(SD <= ", less_than, "| D)")] <- pr_less_than
+    resd[,paste0("BF(SD <= ", less_than, ")")] <- bflts
 
     ###############
     # Regularizer #

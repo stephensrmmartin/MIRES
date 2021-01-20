@@ -36,3 +36,13 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
 savage_dickey <- function(posterior_dens_fun, prior_dens_fun, ...) {
     posterior_dens_fun(0) / prior_dens_fun(...)
 }
+
+prob_less_than <- function(mcmc, less_than) {
+    mean(mcmc <= less_than)
+}
+
+bflt <- function(mcmc, less_than, prior_cumul_fun, ...) {
+    post_prob_lt <- prob_less_than(mcmc, less_than)
+    prior_prob_lt <- prior_cumul_fun(less_than, ...)
+    post_prob_lt / prior_prob_lt
+}

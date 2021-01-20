@@ -42,6 +42,16 @@ rhmre <- function(n, mu = 0, sigma = 1) {
     abs(rnorm(n, 0, hmre))
 }
 
+phmre <- function(q, mu = 0, sigma = 1, lower.tail = TRUE) {
+    f <- function(q, mu, sigma) {
+        integrate(dhmre, 0, q, mu = mu, sigma = sigma)[["value"]]
+    }
+    f <- Vectorize(f)
+    out <- f(q, mu, sigma)
+    if(!lower.tail) out <- 1 - out
+    out
+}
+
 ##' @title Create logspline-based density function.
 ##' @param mcmc MCMC samples.
 ##' @param lbound Integer (Default: 0).
