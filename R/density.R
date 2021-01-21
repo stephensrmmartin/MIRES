@@ -61,7 +61,7 @@ phmre <- function(q, mu = 0, sigma = 1, lower.tail = TRUE) {
 ##' @import logspline
 ##' @keywords internal
 dlogspline <- function(mcmc, lbound = 0, ...) {
-    lso <- logspline::logspline(mcmc, lbound = lbound)
+    lso <- logspline::logspline(mcmc, lbound = lbound, ...)
     df <- function(x) {
         logspline::dlogspline(x, lso)
     }
