@@ -271,7 +271,7 @@ print.summary.mires <- function(x, ...) {
     Mean <- colMeans(mcmc)
     SD <- apply(mcmc, 2, sd)
     Rhat <- apply(mcmc_array, 3, rstan::Rhat)
-    hdis <- .hdi(mcmc, prob, add_zero = FALSE)
+    hdis <- .hdi(mcmc, prob, add_zero = add_zero)
 
     out <- data.frame(Mean, SD, hdis, Rhat)
     out <- cbind(tidy_stanpars(rownames(out), ...), out)
