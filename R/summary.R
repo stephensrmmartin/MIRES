@@ -269,11 +269,12 @@ print.summary.mires <- function(x, ...) {
     }
 
     Mean <- colMeans(mcmc)
+    Median <- apply(mcmc, 2, median)
     SD <- apply(mcmc, 2, sd)
     Rhat <- apply(mcmc_array, 3, rstan::Rhat)
     hdis <- .hdi(mcmc, prob, add_zero = add_zero)
 
-    out <- data.frame(Mean, SD, hdis, Rhat)
+    out <- data.frame(Mean, Median, SD, hdis, Rhat)
     out <- cbind(tidy_stanpars(rownames(out), ...), out)
     rownames(out) <- NULL
     return(out)
