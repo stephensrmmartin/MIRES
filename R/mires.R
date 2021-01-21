@@ -147,8 +147,8 @@ mires <- function(formula, group, data, ...) {
     }
 
     # Restructure group data
-    group_data <- data.complete[, group_string]
-    group_data_numeric <- as.numeric(as.factor(group_data))
+    group_data <- as.factor(data.complete[, group_string])
+    group_data_numeric <- as.numeric(group_data)
     group_k <- length(unique(group_data_numeric))
 
     group <- list(
