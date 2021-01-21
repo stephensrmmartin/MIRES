@@ -31,7 +31,8 @@ mires <- function(formula, group, data, ...) {
     stan_args <- list(data = d$stan_data,
                       cores = detectCores(),
                       chains = dots$chains %IfNull% 4,
-                      control = dots$control %IfNull% list(adapt_delta = .95)
+                      control = dots$control %IfNull% list(adapt_delta = .95),
+                      init = dots$init %IfNull% 0
                       )
     stan_args$control$adapt_delta <- stan_args$control$adapt_delta %IfNull% list(adapt_delta = .95)
     # Avoid arg duplicates
