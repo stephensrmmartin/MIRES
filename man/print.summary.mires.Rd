@@ -11,6 +11,9 @@
 
 \item{...}{Not used.}
 }
+\value{
+x (Invisibly)
+}
 \description{
 Print method for MIRES summary objects.
 }
