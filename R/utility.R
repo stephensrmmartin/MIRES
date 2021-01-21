@@ -37,7 +37,13 @@ prob_to_probs <- function(prob) {
     probs <- c(lower, upper)
     return(probs)
 }
-
+##' @title Tidy up a vector of stan names into a data frame.
+##' @param stannames Character vector of stan names.
+##' @param labs Optional. Character vector for what indices meaningfully pertain to. E.g., c("Factor", "Item") for an FxJ matrix.
+##' @param ... Optional. Named vectors of labels corresponding to indices. E.g., if labs = "Item", and you include \code{Item = colnames(model_matrix)}, then the indices (numeric) are replaced by the name in the supplied vector. E.g., the numeric i will be replaced by the i-th name.
+##' @return Data frame containing parameters and the (optionally named) indices.
+##' @author Stephen R Martin
+##' @keywords internal
 tidy_stanpars <- function(stannames, labs = NULL, ...) {
     dots <- list(...)
     n_replace <- length(dots)
@@ -56,6 +62,12 @@ tidy_stanpars <- function(stannames, labs = NULL, ...) {
     return(out)
 }
 
+##' @title Split stan names into a list of parameter names (char vec) and (col-named) matrix of numeric indices.
+##' @param stannames Char vector.
+##' @param labs Optional. Names of columns to which the indices meaningfully pertain to.
+##' @return List of param names and a matrix of indices.
+##' @author Stephen R Martin
+##' @keywords internal
 split_stannames <- function(stannames, labs = NULL) {
     param_rex <- r"{(.*)\[(.*)\]}"
     param_names <- gsub(param_rex, "\\1", stannames)
