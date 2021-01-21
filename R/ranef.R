@@ -6,6 +6,7 @@
 ##' @importFrom nlme ranef
 ##' @export ranef
 ##' @export
+##' @method ranef mires
 ranef.mires <- function(object, prob = .95, ...) {
     group_name <- object$meta$group$name
 

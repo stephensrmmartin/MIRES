@@ -4,7 +4,7 @@
 \alias{ranef.mires}
 \title{Extract random effects for each group from MIRES model.}
 \usage{
-ranef.mires(object, prob = 0.95, ...)
+\method{ranef}{mires}(object, prob = 0.95, ...)
 }
 \arguments{
 \item{object}{mires object.}
