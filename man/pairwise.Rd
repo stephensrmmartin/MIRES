@@ -20,7 +20,7 @@ pairwise(
 
 \item{prob}{Numeric (0-1). Probability mass contained within the highest density interval.}
 
-\item{less_than}{Numeric (Default: .1; positive). Value at which to assess Pr(parameter < less_than|D).}
+\item{less_than}{Numeric (Default: .1; positive). Value at which to assess Pr(|difference| < less_than|D).}
 
 \item{groups}{Character vector (Optional). If specified, will only compute pairwise differences of the specified groups.}
 
@@ -31,9 +31,6 @@ Data frame.
 }
 \description{
 For a specified set of parameters, this computes all pairwise differences in the random effects across the posterior. Specifically, this computes the posterior differences of groups' parameters, for all parameters. This is useful for comparing groups' estimates under non-invariance.
-}
-\details{
-Posterior summaries for all pairwise differences in random effects of the selected parameter class.
 }
 \author{
 Stephen Martin
