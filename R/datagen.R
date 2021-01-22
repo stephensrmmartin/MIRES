@@ -116,6 +116,7 @@ datagen_uni <- function(J, K, n, fixed, mipattern, etadist = NULL) {
 ##' @param paramSDPattern List.
 ##' @return List.
 ##' @author Stephen Martin
+##' @keywords internal
 generateData <- function(J,K,n,paramSDPattern){
   # Set hyperdata
   J <- J # Number of items

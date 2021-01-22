@@ -24,3 +24,4 @@ Paper simulation function (For historical purposes)
 \author{
 Stephen Martin
 }
+\keyword{internal}
