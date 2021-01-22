@@ -28,7 +28,11 @@ pairwise <- function(mires, param = c("lambda", "resid", "nu"), prob = .95, less
     })
 
     # Summarize each
-    pairwise_summaries <- lapply(pairwise_list, .summary_table_pairwise, prob = prob)
+    pairwise_summaries <- lapply(pairwise_list, .summary_table_pairwise,
+                                 prob = prob,
+                                 hmre_mu = mires$meta$hmre_mu,
+                                 hmre_scale = mires$meta$hmre_scale,
+                                 less_than = less_than)
 
     # Add column to each summary for the parameter
     for(i in seq_along(pairwise_list)) {
@@ -42,17 +46,33 @@ pairwise <- function(mires, param = c("lambda", "resid", "nu"), prob = .95, less
 
     out <- reorder_columns(out, c("Param", "index"))
 
+    # Rename i, j into original group names
+    out[,"i"] <- mires$meta$group$data[match(out[,"i"], mires$meta$group$numeric)]
+    out[,"j"] <- mires$meta$group$data[match(out[,"j"], mires$meta$group$numeric)]
+
     out
     
 }
 
-.summary_table_pairwise <- function(mcmc, prob, ...) {
+.summary_table_pairwise <- function(mcmc, prob, less_than, hmre_mu, hmre_scale, ...) {
     Mean <- colMeans(mcmc)
     Median <- apply(mcmc, 2, median)
     SD <- apply(mcmc, 2, sd)
     hdis <- .hdi(mcmc, prob, add_zero = FALSE)
 
+    # BF01, BF10
+    pw_dfuns <- apply(mcmc, 2, logspline::logspline)
+    bf01 <- sapply(pw_dfuns, function(l) {logspline::dlogspline(0, l)})
+    bf01 <- bf01 / dhmre_pairwise(0, mu = hmre_mu, sigma = hmre_scale)
+    bf10 <- 1 / bf01
+
+    # p(Less than), BF(Less than) TODO: BF(Less than) not implemented; needs phmre_pairwise
+    plt <- apply(abs(mcmc), 2, prob_less_than, less_than = less_than)
+
+
     out <- data.frame(Mean, Median, SD, hdis)
+    out[, c("bf01", "bf10")] <- cbind(bf01, bf10)
+    out[,paste0("Pr(|i-j|<", less_than, "|D)")] <- plt
 
     labels <- do.call(rbind, strsplit(rownames(out), "-"))
     colnames(labels) <- c("i", "j")
