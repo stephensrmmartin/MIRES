@@ -32,6 +32,7 @@ print.mires <- function(x, ...) {
 ##' @title Summary method for mires object.
 ##' @param object mires object.
 ##' @param prob Numeric (Default = .95). Probability mass to be contained in the highest posterior density interval.
+##' @param less_than Numeric (Default: .1; positive). Value at which to assess Pr(parameter < less_than|D).
 ##' @param ... Not used.
 ##' @return summary.mires object. List of meta data and summary. Summary is list of summary tables for all non-random parameters.
 ##' @author Stephen R. Martin

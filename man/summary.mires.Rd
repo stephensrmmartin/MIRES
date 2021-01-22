@@ -11,6 +11,8 @@
 
 \item{prob}{Numeric (Default = .95). Probability mass to be contained in the highest posterior density interval.}
 
+\item{less_than}{Numeric (Default: .1; positive). Value at which to assess Pr(parameter < less_than|D).}
+
 \item{...}{Not used.}
 }
 \value{

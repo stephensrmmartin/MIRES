@@ -7,7 +7,7 @@
 .pairwise_diff_single(mcmc)
 }
 \arguments{
-\item{mires}{Mires object.}
+\item{mcmc}{Numeric matrix. MCMC samples.}
 }
 \value{
 MCMC Matrix of all differences. Posterior samples of all possible differences, minus duplicates.

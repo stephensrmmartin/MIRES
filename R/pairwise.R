@@ -1,3 +1,16 @@
+##' .. content for \description{} (no empty lines) ..
+##'
+##' .. content for \details{} ..
+##' @title Pairwise comparisons of random parameters.
+##' @param mires mires object.
+##' @param param Character. One of lambda (loadings), resid (residual standard deviation on the log scale), or nu (intercepts).
+##' @param prob Numeric (0-1). Probability mass contained within the highest density interval.
+##' @param less_than Numeric (Default: .1; positive). Value at which to assess Pr(parameter < less_than|D).
+##' @param groups Character vector (Optional). If specified, will only compute pairwise differences of the specified groups.
+##' @param ... Not used.
+##' @return Data frame.
+##' @author Stephen Martin
+##' @export
 pairwise <- function(mires, param = c("lambda", "resid", "nu"), prob = .95, less_than = .1, groups = NULL, ...) {
     param <- match.arg(param)
     group_numeric <- seq_len(mires$meta$group$K)
