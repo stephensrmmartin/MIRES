@@ -1,6 +1,6 @@
-##' .. content for \description{} (no empty lines) ..
+##' For a specified set of parameters, this computes all pairwise differences in the random effects across the posterior. Specifically, this computes the posterior differences of groups' parameters, for all parameters. This is useful for comparing groups' estimates under non-invariance.
 ##'
-##' .. content for \details{} ..
+##' Posterior summaries for all pairwise differences in random effects of the selected parameter class.
 ##' @title Pairwise comparisons of random parameters.
 ##' @param mires mires object.
 ##' @param param Character. One of lambda (loadings), resid (residual standard deviation on the log scale), or nu (intercepts).

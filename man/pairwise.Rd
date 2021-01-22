@@ -30,10 +30,10 @@ pairwise(
 Data frame.
 }
 \description{
-.. content for \description{} (no empty lines) ..
+For a specified set of parameters, this computes all pairwise differences in the random effects across the posterior. Specifically, this computes the posterior differences of groups' parameters, for all parameters. This is useful for comparing groups' estimates under non-invariance.
 }
 \details{
-.. content for \details{} ..
+Posterior summaries for all pairwise differences in random effects of the selected parameter class.
 }
 \author{
 Stephen Martin
