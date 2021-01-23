@@ -19,29 +19,15 @@ d <- readRDS("~/Output/MIRES/fit_gen.Rds")
 ds <- d$df
 
 ## fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE)
-## fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25)
+fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25)
 ## fit_prior <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = TRUE, hmre_mu = 0, hmre_scale = .25)
 ## saveRDS(fit, "~/Output/MIRES/fit.Rds")
 fit <- readRDS("~/Output/MIRES/fit.Rds")
 
-samps <- as.matrix(fit$fit, pars = "random_sigma")
-samps[1,] <- 0 # add zero
+## fit_re <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, hmre = FALSE)
+## fit_re_prior <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = TRUE, hmre_mu = 0, hmre_scale = .25, hmre = FALSE)
+fit_re <- readRDS("~/Output/MIRES/fit_re.Rds")
+## saveRDS(fit_re, "~/Output/MIRES/fit_re.Rds")
 
-# Try posterior_sd fn
-funs <- MIRES:::posterior_density_funs_sigmas(fit)
-sapply(funs, function(x){x(0)})
-
-column <- 26
-
-fun.hn <- MIRES:::ddirichletprocess_spike(samps[,column], K = 100, tol_rel_obj = .001)
-fun.exp <- MIRES:::ddirichletprocess_stan(samps[,column], K = 100, tol_rel_obj = .001, model = "dpExp")
-fun.wei <- MIRES:::ddirichletprocess_stan(samps[,column], K = 100, tol_rel_obj = .001, model = "dpWeibull")
-fun.hn2 <- MIRES:::ddirichletprocess_stan(samps[,column], K = 100, tol_rel_obj = .001)
-
-hist(samps[,column], probability = TRUE, breaks = 200)
-curve(funs[[column]](x), add = TRUE, col = "red", n = 1000, 0, .2)
-curve(fun.hn, add = TRUE, col = "green", n = 1000, 0, .2)
-curve(fun.exp, add = TRUE, col = "blue",lty = "dashed", n = 1000, 0, .2)
-curve(fun.wei, add = TRUE, col = "blue",lty = "dotted", n = 1000, 0, .2)
-curve(fun.hn2, add = TRUE, col = "blue", n = 1000, 0, .2)
-
+# There doesn't seem to be any big difference between these; wtf. Maybe due to the data?
+# No difference really when "items", .4, 5/10, K = 20, J = 10, n = 40

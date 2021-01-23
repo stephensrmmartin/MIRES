@@ -74,12 +74,16 @@ mires <- function(formula, group, data, ...) {
     stan_args$data$hmre_scale <- hmre_scale
 
     ## Select model
+    model_root <- "redif"
+    if(hmre) {
+        model_root <- paste0(model_root, "hm")
+    }
     if(multi) { # Multidimensional
-        model <- "redifhm_multi_hier"
+        model <- paste0(model_root, "_multi_hier")
     } else if(sum_coding) {
-        model <- "redifhm_sum"
+        model <- paste0(model_root, "_sum")
     } else { # Fallback
-        model <- "redifhm_hier" 
+        model <- paste0(model_root, "_hier" )
     }
     stan_args$object <- stanmodels[[model]] 
 
@@ -87,8 +91,10 @@ mires <- function(formula, group, data, ...) {
     ### Shared params
     pars <- c("lambda", "resid_log", "nu",
               "lambda_random", "resid_random", "nu_random",
-              "eta_mean", "eta_sd",
-              "hm_tau", "hm_param", "hm_item", "hm_lambda")
+              "eta_mean", "eta_sd")
+    if(hmre) {
+        pars <- c(pars, "hm_tau", "hm_param", "hm_item", "hm_lambda")
+    }
     if(save_scores) {
         pars <- c(pars, "eta")
     }

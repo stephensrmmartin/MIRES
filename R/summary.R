@@ -127,28 +127,32 @@ summary.mires <- function(object, prob = .95, less_than = .1, ...) {
     # Regularizer #
     ###############
 
-    hm <- suppressWarnings(.summary_table(object,
-                         pars = "hm_tau",
-                         prob,
-                         labs = "Parameter")
-                         )
-    hm_param <- .summary_table(object,
-                               pars = "hm_param",
-                               prob,
-                               labs = "Parameter",
-                               Parameter = c("Loading", "Resid", "Intercept"))
-    hm_item <- .summary_table(object,
-                              pars = "hm_item",
-                              prob,
-                              labs = "Item",
-                              Item = object$meta$indicator)
-    hm_lambda <- .summary_table(object,
-                                pars = "hm_lambda",
+    if(object$meta$hmre) {
+        hm <- suppressWarnings(.summary_table(object,
+                            pars = "hm_tau",
+                            prob,
+                            labs = "Parameter")
+                            )
+        hm_param <- .summary_table(object,
+                                pars = "hm_param",
                                 prob,
-                                labs = "RE"
-                                )
-    hm_lambda[,c("Parameter", "Item", "Factor")] <- resd[,c("Parameter", "Item", "Factor")]
-    hm_lambda <- reorder_columns(hm_lambda, c("param", "RE", "Parameter", "Item", "Factor"))
+                                labs = "Parameter",
+                                Parameter = c("Loading", "Resid", "Intercept"))
+        hm_item <- .summary_table(object,
+                                pars = "hm_item",
+                                prob,
+                                labs = "Item",
+                                Item = object$meta$indicator)
+        hm_lambda <- .summary_table(object,
+                                    pars = "hm_lambda",
+                                    prob,
+                                    labs = "RE"
+                                    )
+        hm_lambda[,c("Parameter", "Item", "Factor")] <- resd[,c("Parameter", "Item", "Factor")]
+        hm_lambda <- reorder_columns(hm_lambda, c("param", "RE", "Parameter", "Item", "Factor"))
+    } else {
+        hm <- hm_param <- hm_item <- hm_lambda <- NA
+    }
 
     ##########
     # Return #
