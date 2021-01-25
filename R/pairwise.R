@@ -104,6 +104,9 @@ pairwise <- function(mires, param = c("lambda", "resid", "nu"), prob = .95, less
 .pairwise_diff_single <- function(mcmc) {
     stan_indices <- split_stannames(colnames(mcmc))$indices
     diffs <- t(apply(mcmc, 1, .sample_diff))
+    if(dim(diffs)[1] == 1) { # Stupid exception for one-comparison case. R drop strikes again.
+        diffs <- t(diffs)
+    }
     colnames(diffs) <- .sample_diff_labels(stan_indices[,1])
     diffs
 }
