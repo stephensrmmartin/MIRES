@@ -6,7 +6,7 @@
 ##' All measurement model parameters (loadings, residual SDs, and intercepts) are modeled as possibly randomly varying across groups.
 ##' The random effect variances are then hierarchically modeled from a half-normal distribution with location zero, and estimated scale.
 ##' The prior scale controls whether the RE variance is effectively zero (invariant) or not (non-invariant).
-##' The scale is itself hierarchically modeled and partially pooled.
+##' Therefore, the random effect variances are regularized, and the amount of regularization is itself hierarchically modeled and partially pooled.
 ##' Therefore, whether a parameter is invariant (the variance being effectively zero) or not (the variance permitted to be non-zero) is informed by all other parameters.
 ##' Currently, we assume that each parameter informs the invariance of other similar parameters (presence of variance in loadings informs the presence of variance in other loadings), and of similar items (non-invariance of item j parameters informs other parameters for item j).
 ##' The benefit of this is that information about the presence or absence of invariance of parameters is increased, allowing for more certain decisions about the presence and magnitude of invariance.
