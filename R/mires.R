@@ -47,13 +47,15 @@ mires <- function(formula, group, data, ...) {
     hmre <- dots$hmre %IfNull% TRUE
     hmre_mu <- dots$hmre_mu %IfNull% 0.0
     hmre_scale <- dots$hmre_scale %IfNull% .25
+    marginalize <- dots$marginalize %IfNull% FALSE
     dots[c("sum_coding",
         "eta_cor_nonmi",
         "prior_only",
         "save_scores",
         "hmre",
         "hmre_mu",
-        "hmre_scale")] <- NULL
+        "hmre_scale",
+        "marginalize")] <- NULL
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
@@ -64,7 +66,8 @@ mires <- function(formula, group, data, ...) {
                             save_scores,
                             hmre,
                             hmre_mu,
-                            hmre_scale
+                            hmre_scale,
+                            marginalize
                         )
                 )
 
@@ -84,6 +87,9 @@ mires <- function(formula, group, data, ...) {
         model <- paste0(model_root, "_sum")
     } else { # Fallback
         model <- paste0(model_root, "_hier" )
+    }
+    if(marginalize) {
+        model <- paste0(model, "_marg")
     }
     stan_args$object <- stanmodels[[model]] 
 
