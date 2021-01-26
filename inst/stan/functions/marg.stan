@@ -17,15 +17,18 @@ matrix[] marg_cov_uni(
   int J = cols(lambda);
   int K = rows(lambda_random);
   matrix[J,J] cov_out[K];
+  matrix[K, J] lambda_k = (rep_matrix(lambda, K) + lambda_random) .* rep_matrix(eta_sd, J);
+  matrix[K, J] resid_k = exp(2 * (rep_matrix(resid_log, K) + resid_random));
   for(k in 1:K) {
     /* row_vector[J] lambda_k = (lambda + lambda_random[k]); */
-    matrix[1, J] lambda_k = to_matrix((lambda + lambda_random[k]) * eta_sd[k]);
+    /* matrix[1, J] lambda_k = to_matrix((lambda + lambda_random[k]) * eta_sd[k]); */
     // Optimize this; really sure there's an optimize fn for these ops.
     // Might be able to analytically get cholesky factor from this...
     // No (row)vector crossproducts in Stan.
     // Would be faster in likelihood if instead of n in 1:N, it was k in 1:K, with sorted data.
     /* cov_out[k] = lambda_k' * eta_sd[k]^2 * lambda_k + diag_matrix(exp(2 * (resid_log + resid_random[k]))'); */
-    cov_out[k] = crossprod(lambda_k) + diag_matrix(exp(2 * (resid_log + resid_random[k]))');
+    /* cov_out[k] = crossprod(lambda_k) + diag_matrix(exp(2 * (resid_log + resid_random[k]))'); */
+    cov_out[k] = crossprod(to_matrix(lambda_k[k,])) + diag_matrix(resid_k[k,]');
   }
   return(cov_out);
 }
