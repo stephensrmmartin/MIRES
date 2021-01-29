@@ -58,3 +58,10 @@ segments(x0 = 1:30,
          y0 = summary(fit_hier_re)$summary$resd[,"L95"],
          y1 = summary(fit_hier_re)$summary$resd[,"U95"],
          col = "green")
+
+
+### BF01s
+plot(1:30, y = summary(fit_hier_marg)$summary$resd[,"BF01"], col = "blue")
+points(1:30, y = summary(fit_hier)$summary$resd[,"BF01"], col = "red")
+points(1:30, y = summary(fit_hier_re)$summary$resd[,"BF01"], col = "green")
+legend("topright",legend = c("Marg", "Non-Marg", "RE [Non-Marg]"), col = c("blue", "red", "green"), pch = 1)
