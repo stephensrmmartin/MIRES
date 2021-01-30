@@ -40,15 +40,15 @@ mires <- function(formula, group, data, ...) {
 
     # Model Configuration
     multi <- d$meta$F > 1
-    sum_coding <- dots$sum_coding %IfNull% TRUE
-    eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE
-    prior_only <- dots$prior_only %IfNull% FALSE
-    save_scores <- dots$save_scores %IfNull% FALSE
-    hmre <- dots$hmre %IfNull% TRUE
-    hmre_mu <- dots$hmre_mu %IfNull% 0.0
-    hmre_scale <- dots$hmre_scale %IfNull% .25
-    marginalize <- dots$marginalize %IfNull% FALSE
-    combined <- dots$combined %IfNull% FALSE
+    sum_coding <- dots$sum_coding %IfNull% TRUE # Use Sum-to-zero for latent means (TRUE) or hierarchicalize them (FALSE)
+    eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE # Allow latent correlations to vary (TRUE) or not (FALSE)
+    prior_only <- dots$prior_only %IfNull% FALSE # Sample from prior-only
+    save_scores <- dots$save_scores %IfNull% FALSE # Save scores? Or marginalize? (TODO Fix this)
+    hmre <- dots$hmre %IfNull% TRUE # Use dependent HMRE model?
+    hmre_mu <- dots$hmre_mu %IfNull% 0.0 # HMRE prior location
+    hmre_scale <- dots$hmre_scale %IfNull% .25 # HMRE prior scale
+    marginalize <- dots$marginalize %IfNull% FALSE # Marginalize? (TODO Fix this; redundant with save_scores)
+    combined <- dots$combined %IfNull% FALSE # Use Combined model? (TODO Remove this; default to it once finished testing.)
     dots[c("sum_coding",
         "eta_cor_nonmi",
         "prior_only",
@@ -57,7 +57,7 @@ mires <- function(formula, group, data, ...) {
         "hmre_mu",
         "hmre_scale",
         "marginalize",
-        "combined")] <- NULL
+        "combined")] <- NULL # Remove these from dots.
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
@@ -78,7 +78,7 @@ mires <- function(formula, group, data, ...) {
     stan_args$data$hmre_mu <- hmre_mu
     stan_args$data$hmre_scale <- hmre_scale
 
-    if(combined) { # REMOVE THIS
+    if(combined) { # TODO REMOVE THIS
         stan_args$data$use_hmre = hmre
         stan_args$data$marginalize = marginalize
         stan_args$data$sum_coding = sum_coding
@@ -101,7 +101,7 @@ mires <- function(formula, group, data, ...) {
     }
     stan_args$object <- stanmodels[[model]] 
 
-    if(combined) { # REMOVE THIS
+    if(combined) { # TODO REMOVE THIS
         stan_args$object <- stanmodels[["redifhm_all"]]
     }
 
