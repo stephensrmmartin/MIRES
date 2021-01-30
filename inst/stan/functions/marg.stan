@@ -49,3 +49,46 @@ matrix marg_expect_uni(
   /* } */
   return(exp_out);
 }
+
+int[,] sort_data_by_group_indices(int[] group) {
+  int K = max(group);
+  int N = num_elements(group);
+  int group_sorted[N] = sort_asc(group);
+  int out[K,2];
+  int n_k[K] = rep_array(0, K);
+  int index = 1;
+  for(n in 1:N) { // Count observations of each group.
+    n_k[group[n]] += 1;
+  }
+  for(k in 1:K) {
+    out[k,1] = index;
+    out[k,2] = index + n_k[k] - 1;
+    index += n_k[k];
+  }
+  return(out);
+}
+
+row_vector[] sort_data_by_group(matrix x, int[] group) {
+  int K = max(group);
+  int N = rows(x);
+  int J = cols(x);
+  row_vector[J] out[N];
+  /* matrix[N, J] out; */
+  int group_ordered[N] = sort_indices_asc(group);
+
+  /* int index = 1; */
+  /* for(k in 1:K) { */
+  /*   for(n in 1:N) { */
+  /*     if(group[n] == k) { */
+  /* 	group_ordered[index] = n; */
+  /* 	index += 1; */
+  /*     } */
+  /*   } // N */
+  /* } // K */
+  /* out = x[group_ordered]; */
+  for(n in 1:N) {
+    out[n] = x[group_ordered[n]];
+  }
+  return(out);
+}
+
