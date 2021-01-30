@@ -2,6 +2,7 @@ functions {
 #include /functions/common.stan
 #include /functions/ud.stan
 #include /functions/marg.stan
+#include /functions/sum_to_zero.stan
   
 }
 
@@ -35,13 +36,16 @@ transformed data {
   int lamResNu_indices[3, J] = gen_lamResNu_indices(J);
   int save_scores = 1 - marginalize; // Inverse boolean for easy reading
   int hier_coding = 1 - sum_coding; // Inverse boolean for easy reading
+  vector[N * J] x_vector;
+  row_vector[J] x_sorted[N];
+  int x_sorted_indices[K,2];
 
   // Optimizations
   if(save_scores) { // Vectorize input data in col-major order. x_vector ~ N(to_vector(xhat), to_vector(shat)).
-    vector[N*J] x_vector = to_vector(x);
+    x_vector = to_vector(x);
   } else { // Sort data into K chunks for a loop over K vectorized multi_normal.
-    row_vector[J] x_sorted[N] = sort_data_by_group(x, group);
-    int x_sorted_indices[K, 2] = sort_data_by_group_indices(group);
+    x_sorted = sort_data_by_group(x, group);
+    x_sorted_indices = sort_data_by_group_indices(group);
   }
   
 }
@@ -84,29 +88,36 @@ transformed parameters {
   vector[K] eta_sd = sum_coding ? eta_sds_pto(eta_sd_s) : random[, total + 2];
   row_vector[J] lambda_lowerbound = compute_lambda_lowerbounds(lambda_random);
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
+  vector[N * save_scores] eta; // Declare
+  matrix[K * marginalize, J * marginalize] multi_normal_mu;
+  matrix[K * marginalize, J * marginalize] multi_normal_sigma[K * marginalize];
 
   if(save_scores) { // Compute latent score.
-    vector[N] eta = eta_mean[group] + eta_z .* eta_sd[group];
+    eta = eta_mean[group] + eta_z .* eta_sd[group];
   } else {
     // TODO: Optimization needed: Make marg_expect_uni return an array of vectors for mu.
-    matrix[K, J] multi_normal_mu = marg_expect_uni(lambda, nu, lambda_random, nu_random, eta_mean);
-    matrix[J, J] multi_normal_sigma[K] = marg_cov_uni(lambda, resid_log, lambda_random, resid_random, eta_sd);
+    multi_normal_mu = marg_expect_uni(lambda, nu, lambda_random, nu_random, eta_mean);
+    multi_normal_sigma = marg_cov_uni(lambda, resid_log, lambda_random, resid_random, eta_sd);
   }
 }
 
 model {
+  // Declarations
+  matrix[N * save_scores, J * save_scores] xhat;
+  matrix[N * save_scores, J * save_scores] s_loghat;
+  vector[total] hm_hat;
   if(save_scores) { // Construct xhat and s_loghat.
-    matrix[N, J] xhat = rep_matrix(nu, N) + eta*lambda; // Fixed effects
-    matrix[N, J] s_loghat = rep_matrix(resid_log, N); // Fixed effects
+    xhat = rep_matrix(nu, N) + eta*lambda; // Fixed effects
+    s_loghat = rep_matrix(resid_log, N); // Fixed effects
     xhat += nu_random[group] + rep_matrix(eta, J) .* lambda_random[group];
     s_loghat += resid_random[group];
   }
 
   if(use_hmre) { // Construct dependent hierarchical inclusion model.
-    vector[total] hm_hat = exp(hm_tau + hm_param[hm_param_index] + hm_item[hm_item_index] + hm_lambda);
+    hm_hat = exp(hm_tau + hm_param[hm_param_index] + hm_item[hm_item_index] + hm_lambda);
   } else { // Construct independent hierarchical inclusion model.
     // In the future, may want to change this to use, say, a constant, or integrated, prior.
-    vector[total] hm_hat = exp(hm_lambda); // For random-effect models; they use a non-dependent regularization.
+    hm_hat = exp(hm_lambda); // For random-effect models; they use a non-dependent regularization.
   }
 
   // Priors

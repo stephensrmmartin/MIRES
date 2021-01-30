@@ -76,6 +76,12 @@ mires <- function(formula, group, data, ...) {
     stan_args$data$hmre_mu <- hmre_mu
     stan_args$data$hmre_scale <- hmre_scale
 
+    if(combined) { # REMOVE THIS
+        stan_args$data$use_hmre = hmre
+        stan_args$data$marginalize = marginalize
+        stan_args$data$sum_coding = sum_coding
+    }
+
     ## Select model
     model_root <- "redif"
     if(hmre) {
@@ -92,6 +98,10 @@ mires <- function(formula, group, data, ...) {
         model <- paste0(model, "_marg")
     }
     stan_args$object <- stanmodels[[model]] 
+
+    if(combined) { # REMOVE THIS
+        stan_args$object <- stanmodels[["redifhm_all"]]
+    }
 
     ## Select params
     ### Shared params
