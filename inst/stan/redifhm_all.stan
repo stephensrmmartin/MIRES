@@ -90,7 +90,7 @@ transformed parameters {
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   vector[N * save_scores] eta; // Declare
   matrix[K * marginalize, J * marginalize] multi_normal_mu;
-  matrix[K * marginalize, J * marginalize] multi_normal_sigma[K * marginalize];
+  matrix[J * marginalize, J * marginalize] multi_normal_sigma[K * marginalize];
 
   if(save_scores) { // Compute latent score.
     eta = eta_mean[group] + eta_z .* eta_sd[group];

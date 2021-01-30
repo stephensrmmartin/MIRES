@@ -48,6 +48,7 @@ mires <- function(formula, group, data, ...) {
     hmre_mu <- dots$hmre_mu %IfNull% 0.0
     hmre_scale <- dots$hmre_scale %IfNull% .25
     marginalize <- dots$marginalize %IfNull% FALSE
+    combined <- dots$combined %IfNull% FALSE
     dots[c("sum_coding",
         "eta_cor_nonmi",
         "prior_only",
@@ -55,7 +56,8 @@ mires <- function(formula, group, data, ...) {
         "hmre",
         "hmre_mu",
         "hmre_scale",
-        "marginalize")] <- NULL
+        "marginalize",
+        "combined")] <- NULL
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
