@@ -85,7 +85,7 @@ transformed parameters {
   matrix[K, J] resid_random = random[, lamResNu_indices[2]];
   matrix[K, J] nu_random = random[, lamResNu_indices[3]];
   vector[K] eta_mean = sum_coding ? eta_means_stz(eta_mean_s) : random[, total + 1];
-  vector[K] eta_sd = sum_coding ? eta_sds_pto(eta_sd_s) : random[, total + 2];
+  vector[K] eta_sd = sum_coding ? eta_sds_pto(eta_sd_s) : exp(random[, total + 2]);
   row_vector[J] lambda_lowerbound = compute_lambda_lowerbounds(lambda_random);
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   vector[N * save_scores] eta; // Declare

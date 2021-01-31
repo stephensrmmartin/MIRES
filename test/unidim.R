@@ -11,6 +11,7 @@ n <- 100
 
 fixed <- list(lambda = rep(.7, J), resid_log = rep(log(sqrt(1 - .7^2)), J), nu = rep(0, J))
 mipattern <- list("items", .4, floor(J/2))
+mipattern <- list("params", .3, 2)
 etadist <- "std"
 
 ## mipattern <- list("none")
@@ -48,15 +49,16 @@ fit_hier_re_comb <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x
 fit_hier_marg_comb <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE, marginalize=TRUE, combined = TRUE)
 
 
+mod_list <- mget(ls(pattern = "fit.*"))
+lapply(mod_list, function(x){mean(rowMeans(rstan::get_elapsed_time(x$fit)))/60})
+lapply(mod_list, function(x) {summary(x)$summary$lambda[,"Mean"]})
+lapply(mod_list, function(x) {summary(x)$summary$resid[,"Mean"]})
+lapply(mod_list, function(x) {summary(x)$summary$nu[,"Mean"]})
+lapply(mod_list, function(x) {summary(x)$summary$resd[,"Mean"]})
+
 ########
 # Misc #
 ########
-
-# Get mean times (in minutes)
-mean(rowMeans(rstan::get_elapsed_time(fit_hier_marg$fit))) / 60
-mean(rowMeans(rstan::get_elapsed_time(fit_hier$fit))) / 60
-mean(rowMeans(rstan::get_elapsed_time(fit_hier_re$fit))) / 60
-
 
 # Plot RESDs diffs
 plot(1:30, y = summary(fit_hier_marg)$summary$resd[,"Mean"], ylim = c(0, .5), col = "blue")
