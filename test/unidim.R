@@ -55,6 +55,8 @@ lapply(mod_list, function(x) {summary(x)$summary$lambda[,"Mean"]})
 lapply(mod_list, function(x) {summary(x)$summary$resid[,"Mean"]})
 lapply(mod_list, function(x) {summary(x)$summary$nu[,"Mean"]})
 lapply(mod_list, function(x) {summary(x)$summary$resd[,"Mean"]})
+lapply(mod_list, function(x) {ranef(x)$eta_mean[,"Mean"]})
+lapply(mod_list, function(x) {ranef(x)$eta_sd[,"Mean"]})
 
 ########
 # Misc #
