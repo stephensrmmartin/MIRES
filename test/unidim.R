@@ -25,3 +25,10 @@ fit_hier_incl <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 
                        identification = "hier",
                        save_scores = FALSE,
                        prior = c(0, .25), iter = 1000)
+
+
+fit_sum_incl <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds,
+                       inclusion_model = "dep",
+                       identification = "non",
+                       save_scores = FALSE,
+                       prior = c(0, .25), iter = 1000)
