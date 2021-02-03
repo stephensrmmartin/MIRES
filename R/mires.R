@@ -29,7 +29,7 @@
 ##' @param group Grouping variable (as raw name). Grouping variable over which to assess invariance.
 ##' @param data data.frame. Must contain the indicators specified in formula, and the grouping variable.
 ##' @param inclusion_model String (Default: dependent). If dependent, then the regularization of RE-SDs are dependent (See Details). If independent, then regularization is per-parameter. This is useful for comparing a dependent inclusion model to a non-dependent inclusion model. Note that adaptive regularization occurs regardless until a non-regularized version is included.
-##' @param identification String (Default: hierarchical). If hierarchical, then latent means and (log) SDs are identified as zero-centered random effects. If non_hierarchical, then latent means are identified by a sum-to-zero constraint, and latent SDs are identified by a product-to-one constraint.
+##' @param identification String (Default: sum_to_zero). If hierarchical, then latent means and (log) SDs are identified as zero-centered random effects. If non_hierarchical, then latent means are identified by a sum-to-zero constraint, and latent SDs are identified by a product-to-one constraint.
 ##' @param save_scores Logical (Default: FALSE). If TRUE, latent scores for each observation are estimated. If FALSE (Default), latent scores are marginalized; this can result in more efficient sampling and faster fits, due to the drastic reduction in estimated parameters. Note that the random effects for each group are always estimated, and are not marginalized out.
 ##' @param prior_only Logical (Default: FALSE). If TRUE, samples are drawn from the prior.
 ##' @param prior Numeric vector (Default: c(0, .25)). The location and scale parameters for the hierarchical inclusion model.
@@ -43,7 +43,7 @@ mires <- function(formula,
                   group,
                   data,
                   inclusion_model = c("dependent", "independent"),
-                  identification = c("hierarchical", "non_hierarchical"),
+                  identification = c("sum_to_zero", "hierarchical"),
                   save_scores = FALSE,
                   prior_only = FALSE,
                   prior = c(0, .25),
@@ -73,7 +73,7 @@ mires <- function(formula,
     prior_only <- prior_only
     hmre_mu <- prior[1]
     hmre_scale <- prior[2]
-    sum_coding <- ident == "non_hierarchical"
+    sum_coding <- ident == "sum_to_zero"
 
     ## For multidimensional models (Not implemented yet)
     multi <- d$meta$F > 1
@@ -120,6 +120,9 @@ mires <- function(formula,
     }
     if(save_scores) {
         pars <- c(pars, "eta")
+    }
+    if(!sum_coding) {
+        pars <- c(pars, "eta_random_sigma")
     }
 
     stan_args$pars <- pars
