@@ -4,24 +4,50 @@
 ##' MIRES stands for Measurement Invariance assessment with Random Effects and Shrinkage.
 ##' Specifically, it fits a random-effects measurement model, with the addition of a "Hierarchical Inclusion Model" (the "Shrinkage" part) on the random effect variances.
 ##' All measurement model parameters (loadings, residual SDs, and intercepts) are modeled as possibly randomly varying across groups.
-##' The random effect variances are then hierarchically modeled from a half-normal distribution with location zero, and estimated scale.
+##' The random effect standard deviations (RE-SDs) are then hierarchically modeled from a half-normal distribution with location zero, and a scale.
+##' 
 ##' The prior scale controls whether the RE variance is effectively zero (invariant) or not (non-invariant).
 ##' Therefore, the random effect variances are regularized, and the amount of regularization is itself hierarchically modeled and partially pooled.
 ##' Therefore, whether a parameter is invariant (the variance being effectively zero) or not (the variance permitted to be non-zero) is informed by all other parameters.
 ##' Currently, we assume that each parameter informs the invariance of other similar parameters (presence of variance in loadings informs the presence of variance in other loadings), and of similar items (non-invariance of item j parameters informs other parameters for item j).
 ##' The benefit of this is that information about the presence or absence of invariance of parameters is increased, allowing for more certain decisions about the presence and magnitude of invariance.
 ##' This is in contrast to the typical random effect approach, wherein it is assumed that all RE variances are independent of one another.
+##'
+##' The "Hierarchical inclusion model" on the RE-SDs manifests as a hierarchical prior:
+##' \deqn{p(\sigma_p | \exp(\tau)) = \mathcal{N}^+(\sigma_p | 0, \exp(\tau))}
+##' \deqn{\tau = \tau_c + \tau_{\text{param}_p} + \tau_{\text{item}_p} + \tau_p}
+##' \deqn{\tau_* \sim \mathcal{N}(\mu_h, \sigma_h)}
+##' When a dependent inclusion model is specified, then the above is the specification.
+##' Therefore, the regularization of each RE-SD is shared between all RE-SDs (tau_c), all RE-SDs of the same parameter type (tau_param), and all RE-SDs of the same item (tau_item).
+##' 
+##' When an independent inclusion model is specified, only the independent regularization term \eqn{\tau_p} is included.
+##' The implied marginal prior remains the same, but RE-SDs cannot share regularization intensities between one another.
+##'
+##' The inclusion model hyper parameters (mu_h, sigma_h) can be specified, but we recommend the default as a relatively sane, but weakly informative prior.
 ##' @title Fit mixed effects measurement model for invariance assessment.
 ##' @param formula Formula (or list of formulas). LHS is the factor name, and RHS contains indicators.
 ##' @param group Grouping variable (as raw name). Grouping variable over which to assess invariance.
 ##' @param data data.frame. Must contain the indicators specified in formula, and the grouping variable.
+##' @param inclusion_model String (Default: dependent). If dependent, then the regularization of RE-SDs are dependent (See Details). If independent, then regularization is per-parameter. This is useful for comparing a dependent inclusion model to a non-dependent inclusion model. Note that adaptive regularization occurs regardless until a non-regularized version is included.
+##' @param identification String (Default: hierarchical). If hierarchical, then latent means and (log) SDs are identified as zero-centered random effects. If non_hierarchical, then latent means are identified by a sum-to-zero constraint, and latent SDs are identified by a product-to-one constraint.
+##' @param save_scores Logical (Default: FALSE). If TRUE, latent scores for each observation are estimated. If FALSE (Default), latent scores are marginalized; this can result in more efficient sampling and faster fits, due to the drastic reduction in estimated parameters. Note that the random effects for each group are always estimated, and are not marginalized out.
+##' @param prior_only Logical (Default: FALSE). If TRUE, samples are drawn from the prior.
+##' @param prior Numeric vector (Default: c(0, .25)). The location and scale parameters for the hierarchical inclusion model.
 ##' @param ... Further arguments to \code{\link[rstan]{sampling}}.
 ##' @return mires object.
 ##' @import rstan
 ##' @importFrom parallel detectCores
 ##' @author Stephen R. Martin
 ##' @export
-mires <- function(formula, group, data, ...) {
+mires <- function(formula,
+                  group,
+                  data,
+                  inclusion_model = c("dependent", "independent"),
+                  identification = c("hierarchical", "non_hierarchical"),
+                  save_scores = FALSE,
+                  prior_only = FALSE,
+                  prior = c(0, .25),
+                  ...) {
     dots <- list(...)
 
     # Get parsed data structures
@@ -39,30 +65,28 @@ mires <- function(formula, group, data, ...) {
     dots[names(dots) %in% names(stan_args)] <- NULL
 
     # Model Configuration
-    prior_only <- dots$prior_only %IfNull% FALSE # Sample from prior-only
+    inclusion_model <- match.arg(inclusion_model)
+    ident <- match.arg(identification)
+    hmre <- inclusion_model == "dependent"
+    save_scores <- save_scores
+    marginalize <- !save_scores
+    prior_only <- prior_only
+    hmre_mu <- prior[1]
+    hmre_scale <- prior[2]
+    sum_coding <- ident == "non_hierarchical"
+
+    ## For multidimensional models (Not implemented yet)
     multi <- d$meta$F > 1
     eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE # Allow latent correlations to vary (TRUE) or not (FALSE)
-    sum_coding <- dots$sum_coding %IfNull% TRUE # Use Sum-to-zero for latent means (TRUE) or hierarchicalize them (FALSE)
-    save_scores <- dots$save_scores %IfNull% FALSE # Save scores? Or marginalize? (TODO Fix this)
-    hmre <- dots$hmre %IfNull% TRUE # Use dependent HMRE model?
-    hmre_mu <- dots$hmre_mu %IfNull% 0.0 # HMRE prior location
-    hmre_scale <- dots$hmre_scale %IfNull% .25 # HMRE prior scale
-    marginalize <- !save_scores
     dots[c(
-        "sum_coding",
-        "eta_cor_nonmi",
-        "prior_only",
-        "save_scores",
-        "hmre",
-        "hmre_mu",
-        "hmre_scale"
+        "eta_cor_nonmi"
         )] <- NULL # Remove these from dots.
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
                             multi,
-                            sum_coding,
                             eta_cor_nonmi,
+                            sum_coding,
                             prior_only,
                             save_scores,
                             hmre,
@@ -72,32 +96,34 @@ mires <- function(formula, group, data, ...) {
                         )
                 )
 
-    stan_args$data$eta_cor_nonmi <- eta_cor_nonmi
-    stan_args$data$prior_only <- prior_only
-    stan_args$data$hmre_mu <- hmre_mu
-    stan_args$data$hmre_scale <- hmre_scale
-    stan_args$data$use_hmre <- hmre
-    stan_args$data$marginalize <- marginalize
-    stan_args$data$sum_coding <- sum_coding
+    # Push config options to Stan
+    stan_args$data <- within(stan_args$data,{
+        eta_cor_nonmi = eta_cor_nonmi
+        prior_only = prior_only
+        hmre_mu = hmre_mu
+        hmre_scale = hmre_scale
+        use_hmre = hmre
+        marginalize = marginalize
+        sum_coding = sum_coding
+    })
 
     ## Select model
-    ## Deprecated; now just using combined model.
     stan_args$object <- stanmodels[["redifhm_all"]]
 
     ## Select params
     ### Shared params
     pars <- c("lambda", "resid_log", "nu",
               "lambda_random", "resid_random", "nu_random",
-              "eta_mean", "eta_sd")
+              "eta_mean", "eta_sd", "RE_cor", "random_sigma")
     if(hmre) {
         pars <- c(pars, "hm_tau", "hm_param", "hm_item", "hm_lambda")
     }
     if(save_scores) {
         pars <- c(pars, "eta")
     }
-    pars <- c(pars, "RE_cor", "random_sigma")
 
     stan_args$pars <- pars
+
     stanOut <- do.call(sampling, c(stan_args, dots))
 
     out <- list(meta = d$meta,

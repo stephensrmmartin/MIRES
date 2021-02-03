@@ -4,7 +4,17 @@
 \alias{mires}
 \title{Fit mixed effects measurement model for invariance assessment.}
 \usage{
-mires(formula, group, data, ...)
+mires(
+  formula,
+  group,
+  data,
+  inclusion_model = c("dependent", "independent"),
+  identification = c("hierarchical", "non_hierarchical"),
+  save_scores = FALSE,
+  prior_only = FALSE,
+  prior = c(0, 0.25),
+  ...
+)
 }
 \arguments{
 \item{formula}{Formula (or list of formulas). LHS is the factor name, and RHS contains indicators.}
@@ -12,6 +22,16 @@ mires(formula, group, data, ...)
 \item{group}{Grouping variable (as raw name). Grouping variable over which to assess invariance.}
 
 \item{data}{data.frame. Must contain the indicators specified in formula, and the grouping variable.}
+
+\item{inclusion_model}{String (Default: dependent). If dependent, then the regularization of RE-SDs are dependent (See Details). If independent, then regularization is per-parameter. This is useful for comparing a dependent inclusion model to a non-dependent inclusion model. Note that adaptive regularization occurs regardless until a non-regularized version is included.}
+
+\item{identification}{String (Default: hierarchical). If hierarchical, then latent means and (log) SDs are identified as zero-centered random effects. If non_hierarchical, then latent means are identified by a sum-to-zero constraint, and latent SDs are identified by a product-to-one constraint.}
+
+\item{save_scores}{Logical (Default: FALSE). If TRUE, latent scores for each observation are estimated. If FALSE (Default), latent scores are marginalized; this can result in more efficient sampling and faster fits, due to the drastic reduction in estimated parameters. Note that the random effects for each group are always estimated, and are not marginalized out.}
+
+\item{prior_only}{Logical (Default: FALSE). If TRUE, samples are drawn from the prior.}
+
+\item{prior}{Numeric vector (Default: c(0, .25)). The location and scale parameters for the hierarchical inclusion model.}
 
 \item{...}{Further arguments to \code{\link[rstan]{sampling}}.}
 }
@@ -25,13 +45,26 @@ Fits mixed effects measurement models for measurement invariance assessment.
 MIRES stands for Measurement Invariance assessment with Random Effects and Shrinkage.
 Specifically, it fits a random-effects measurement model, with the addition of a "Hierarchical Inclusion Model" (the "Shrinkage" part) on the random effect variances.
 All measurement model parameters (loadings, residual SDs, and intercepts) are modeled as possibly randomly varying across groups.
-The random effect variances are then hierarchically modeled from a half-normal distribution with location zero, and estimated scale.
+The random effect standard deviations (RE-SDs) are then hierarchically modeled from a half-normal distribution with location zero, and a scale.
+
 The prior scale controls whether the RE variance is effectively zero (invariant) or not (non-invariant).
-The scale is itself hierarchically modeled and partially pooled.
+Therefore, the random effect variances are regularized, and the amount of regularization is itself hierarchically modeled and partially pooled.
 Therefore, whether a parameter is invariant (the variance being effectively zero) or not (the variance permitted to be non-zero) is informed by all other parameters.
 Currently, we assume that each parameter informs the invariance of other similar parameters (presence of variance in loadings informs the presence of variance in other loadings), and of similar items (non-invariance of item j parameters informs other parameters for item j).
 The benefit of this is that information about the presence or absence of invariance of parameters is increased, allowing for more certain decisions about the presence and magnitude of invariance.
 This is in contrast to the typical random effect approach, wherein it is assumed that all RE variances are independent of one another.
+
+The "Hierarchical inclusion model" on the RE-SDs manifests as a hierarchical prior:
+\deqn{p(\sigma_p | \exp(\tau)) = \mathcal{N}^+(\sigma_p | 0, \exp(\tau))}
+\deqn{\tau = \tau_c + \tau_{\text{param}_p} + \tau_{\text{item}_p} + \tau_p}
+\deqn{\tau_* \sim \mathcal{N}(\mu_h, \sigma_h)}
+When a dependent inclusion model is specified, then the above is the specification.
+Therefore, the regularization of each RE-SD is shared between all RE-SDs (tau_c), all RE-SDs of the same parameter type (tau_param), and all RE-SDs of the same item (tau_item).
+
+When an independent inclusion model is specified, only the independent regularization term \eqn{\tau_p} is included.
+The implied marginal prior remains the same, but RE-SDs cannot share regularization intensities between one another.
+
+The inclusion model hyper parameters (mu_h, sigma_h) can be specified, but we recommend the default as a relatively sane, but weakly informative prior.
 }
 \author{
 Stephen R. Martin

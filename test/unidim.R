@@ -20,70 +20,8 @@ d <- MIRES:::datagen_uni(J, K, n, fixed, mipattern, etadist = etadist)
 
 ds <- d$df
 
-# HMRE
-fit <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25)
-
-# Hierarchical HMRE
-fit_hier <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE)
-
-# Hierarchical non-HMRE
-fit_hier_re <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE, hmre = FALSE)
-
-# Hierarchical Marg.
-fit_hier_marg <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE, marginalize=TRUE)
-
-##################
-# COMBINED MODEL #
-##################
-
-# HMRE (Combined)
-fit_comb <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, combined = TRUE)
-
-# Hierarchical HMRE (Combined)
-fit_hier_comb <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE, combined = TRUE)
-
-# Hierarchical non-HMRE (Combined)
-fit_hier_re_comb <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE, hmre = FALSE, combined = TRUE)
-
-# Hierarchical Marg. (Combined)
-fit_hier_marg_comb <- mires(myfactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds, iter = 1000, prior_only = FALSE, hmre_mu = 0, hmre_scale = .25, sum_coding = FALSE, marginalize=TRUE, combined = TRUE)
-
-
-mod_list <- mget(ls(pattern = "fit.*"))
-lapply(mod_list, function(x){mean(rowMeans(rstan::get_elapsed_time(x$fit)))/60})
-lapply(mod_list, function(x) {summary(x)$summary$lambda[,"Mean"]})
-lapply(mod_list, function(x) {summary(x)$summary$resid[,"Mean"]})
-lapply(mod_list, function(x) {summary(x)$summary$nu[,"Mean"]})
-lapply(mod_list, function(x) {summary(x)$summary$resd[,"Mean"]})
-lapply(mod_list, function(x) {ranef(x)$eta_mean[,"Mean"]})
-lapply(mod_list, function(x) {ranef(x)$eta_sd[,"Mean"]})
-
-########
-# Misc #
-########
-
-# Plot RESDs diffs
-plot(1:30, y = summary(fit_hier_marg)$summary$resd[,"Mean"], ylim = c(0, .5), col = "blue")
-points(1:30, y = summary(fit_hier)$summary$resd[,"Mean"], ylim = c(0, .2), col = "red")
-points(1:30, y = summary(fit_hier_re)$summary$resd[,"Mean"], ylim = c(0, .2), col = "green")
-legend("topright",legend = c("Marg", "Non-Marg", "RE [Non-Marg]"), col = c("blue", "red", "green"), pch = 1)
-## CrI
-segments(x0 = 1:30,
-         y0 = summary(fit_hier_marg)$summary$resd[,"L95"],
-         y1 = summary(fit_hier_marg)$summary$resd[,"U95"],
-         col = "blue")
-segments(x0 = 1:30,
-         y0 = summary(fit_hier)$summary$resd[,"L95"],
-         y1 = summary(fit_hier)$summary$resd[,"U95"],
-         col = "red")
-segments(x0 = 1:30,
-         y0 = summary(fit_hier_re)$summary$resd[,"L95"],
-         y1 = summary(fit_hier_re)$summary$resd[,"U95"],
-         col = "green")
-
-
-### BF01s
-plot(1:30, y = summary(fit_hier_marg)$summary$resd[,"BF01"], col = "blue")
-points(1:30, y = summary(fit_hier)$summary$resd[,"BF01"], col = "red")
-points(1:30, y = summary(fit_hier_re)$summary$resd[,"BF01"], col = "green")
-legend("topright",legend = c("Marg", "Non-Marg", "RE [Non-Marg]"), col = c("blue", "red", "green"), pch = 1)
+fit_hier_incl <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 + x_9 + x_10, group = group, ds,
+                       inclusion_model = "dep",
+                       identification = "hier",
+                       save_scores = FALSE,
+                       prior = c(0, .25), iter = 1000)
