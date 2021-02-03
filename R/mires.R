@@ -39,25 +39,24 @@ mires <- function(formula, group, data, ...) {
     dots[names(dots) %in% names(stan_args)] <- NULL
 
     # Model Configuration
-    multi <- d$meta$F > 1
-    sum_coding <- dots$sum_coding %IfNull% TRUE # Use Sum-to-zero for latent means (TRUE) or hierarchicalize them (FALSE)
-    eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE # Allow latent correlations to vary (TRUE) or not (FALSE)
     prior_only <- dots$prior_only %IfNull% FALSE # Sample from prior-only
+    multi <- d$meta$F > 1
+    eta_cor_nonmi <- dots$eta_cor_nonmi %IfNull% FALSE # Allow latent correlations to vary (TRUE) or not (FALSE)
+    sum_coding <- dots$sum_coding %IfNull% TRUE # Use Sum-to-zero for latent means (TRUE) or hierarchicalize them (FALSE)
     save_scores <- dots$save_scores %IfNull% FALSE # Save scores? Or marginalize? (TODO Fix this)
     hmre <- dots$hmre %IfNull% TRUE # Use dependent HMRE model?
     hmre_mu <- dots$hmre_mu %IfNull% 0.0 # HMRE prior location
     hmre_scale <- dots$hmre_scale %IfNull% .25 # HMRE prior scale
-    marginalize <- dots$marginalize %IfNull% FALSE # Marginalize? (TODO Fix this; redundant with save_scores)
-    combined <- dots$combined %IfNull% FALSE # Use Combined model? (TODO Remove this; default to it once finished testing.)
-    dots[c("sum_coding",
+    marginalize <- !save_scores
+    dots[c(
+        "sum_coding",
         "eta_cor_nonmi",
         "prior_only",
         "save_scores",
         "hmre",
         "hmre_mu",
-        "hmre_scale",
-        "marginalize",
-        "combined")] <- NULL # Remove these from dots.
+        "hmre_scale"
+        )] <- NULL # Remove these from dots.
 
     # Save config options to metadata list
     d$meta <- c(d$meta, nlist(
@@ -77,33 +76,13 @@ mires <- function(formula, group, data, ...) {
     stan_args$data$prior_only <- prior_only
     stan_args$data$hmre_mu <- hmre_mu
     stan_args$data$hmre_scale <- hmre_scale
-
-    if(combined) { # TODO REMOVE THIS
-        stan_args$data$use_hmre = hmre
-        stan_args$data$marginalize = marginalize
-        stan_args$data$sum_coding = sum_coding
-    }
+    stan_args$data$use_hmre <- hmre
+    stan_args$data$marginalize <- marginalize
+    stan_args$data$sum_coding <- sum_coding
 
     ## Select model
-    model_root <- "redif"
-    if(hmre) {
-        model_root <- paste0(model_root, "hm")
-    }
-    if(multi) { # Multidimensional
-        model <- paste0(model_root, "_multi_hier")
-    } else if(sum_coding) {
-        model <- paste0(model_root, "_sum")
-    } else { # Fallback
-        model <- paste0(model_root, "_hier" )
-    }
-    if(marginalize) {
-        model <- paste0(model, "_marg")
-    }
-    stan_args$object <- stanmodels[[model]] 
-
-    if(combined) { # TODO REMOVE THIS
-        stan_args$object <- stanmodels[["redifhm_all"]]
-    }
+    ## Deprecated; now just using combined model.
+    stan_args$object <- stanmodels[["redifhm_all"]]
 
     ## Select params
     ### Shared params
