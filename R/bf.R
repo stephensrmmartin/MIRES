@@ -58,7 +58,7 @@ prob_less_than <- function(mcmc, less_than) {
 ##' @return BF12 value.
 ##' @author Stephen Martin
 ##' @keywords internal
-bflt <- function(mcmc, less_than, prior_cumul_fun, bf12 = TRUE, ...) {
+bflt <- function(mcmc, less_than, prior_cumul_fun, ...) {
     post_prob_lt <- prob_less_than(mcmc, less_than)
     prior_prob_lt <- prior_cumul_fun(less_than, ...)
     bf1u <- post_prob_lt / prior_prob_lt
@@ -66,7 +66,7 @@ bflt <- function(mcmc, less_than, prior_cumul_fun, bf12 = TRUE, ...) {
     post_prob_gt <- 1 - post_prob_lt
     prior_prob_gt <- 1- prior_prob_lt
     bf2u <- post_prob_gt / prior_prob_gt
-    bf12 <- bf1u / bf2u
+    bf12_out <- bf1u / bf2u
 
-    ifelse(bf12, bf12, bf1u)
+    bf12_out
 }

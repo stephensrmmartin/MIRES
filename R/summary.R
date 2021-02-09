@@ -119,7 +119,8 @@ summary.mires <- function(object, prob = .95, less_than = .1, ...) {
                    less_than = less_than,
                    prior_cumul_fun = phmre,
                    mu = object$meta$hmre_mu,
-                   sigma = object$meta$hmre_scale)
+                   sigma = object$meta$hmre_scale
+                   )
     resd[,paste0("Pr(SD <= ", less_than, "| D)")] <- pr_less_than
     resd[,paste0("BF(SD <= ", less_than, ")")] <- bflts
 
