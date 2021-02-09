@@ -9,7 +9,7 @@ mires(
   group,
   data,
   inclusion_model = c("dependent", "independent"),
-  identification = c("hierarchical", "non_hierarchical"),
+  identification = c("sum_to_zero", "hierarchical"),
   save_scores = FALSE,
   prior_only = FALSE,
   prior = c(0, 0.25),
@@ -25,7 +25,7 @@ mires(
 
 \item{inclusion_model}{String (Default: dependent). If dependent, then the regularization of RE-SDs are dependent (See Details). If independent, then regularization is per-parameter. This is useful for comparing a dependent inclusion model to a non-dependent inclusion model. Note that adaptive regularization occurs regardless until a non-regularized version is included.}
 
-\item{identification}{String (Default: hierarchical). If hierarchical, then latent means and (log) SDs are identified as zero-centered random effects. If non_hierarchical, then latent means are identified by a sum-to-zero constraint, and latent SDs are identified by a product-to-one constraint.}
+\item{identification}{String (Default: sum_to_zero). If hierarchical, then latent means and (log) SDs are identified as zero-centered random effects. If non_hierarchical, then latent means are identified by a sum-to-zero constraint, and latent SDs are identified by a product-to-one constraint.}
 
 \item{save_scores}{Logical (Default: FALSE). If TRUE, latent scores for each observation are estimated. If FALSE (Default), latent scores are marginalized; this can result in more efficient sampling and faster fits, due to the drastic reduction in estimated parameters. Note that the random effects for each group are always estimated, and are not marginalized out.}
 
