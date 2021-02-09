@@ -32,3 +32,6 @@ fit_sum_incl <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8 +
                        identification = "sum",
                        save_scores = FALSE,
                        prior = c(0, .25), iter = 1000)
+
+bf12s <- summary(fit_sum_incl, bf12 = TRUE)$summary$resd[,14]
+bf1us <- summary(fit_sum_incl, bf12 = FALSE)$summary$resd[,14]
