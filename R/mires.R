@@ -37,6 +37,7 @@
 ##' @return mires object.
 ##' @import rstan
 ##' @importFrom parallel detectCores
+##' @import stats
 ##' @author Stephen R. Martin
 ##' @export
 mires <- function(formula,

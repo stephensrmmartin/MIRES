@@ -210,14 +210,12 @@ rpnorm <- function(n, mu = 0, sigma = 1) {
 ##' @title Generate Truncated Dirichlet Process Mixture.
 ##' @param N Number of data points.
 ##' @param K Max cluster.
-##' @param param Data.frame of parameters corresponding to d and r distribution  functions.
+##' @param param Data.frame of parameters corresponding to d and r distribution  functions. (E.g., data.frame(mean = rnorm(50), sd = abs(rnorm(50, 0, .5))))
 ##' @param alpha Numeric. The alpha parameter to the DP.
 ##' @param f Character. Root name of base or kernel function (e.g., "norm", "exp").
 ##' @return List of data (y), weights (pi), params (param), and the true density function (d).
 ##' @author Stephen Martin
 ##' @keywords internal
-##' @examples
-##' y <- genMixture(1000, 50, data.frame(mean = rnorm(50), sd = abs(rnorm(50, 0, .5))), .4, "norm")
 simulate_DP <- function(N, K, param, alpha, f) {
     pi <- genStickBreakPi(K, alpha)
 

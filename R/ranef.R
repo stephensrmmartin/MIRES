@@ -1,12 +1,14 @@
 ##' @title Extract random effects for each group from MIRES model.
 ##' @param object mires object.
+##' @param prob Numeric (Default: .95). Amount of probability mass to contain within the credible interval.
 ##' @param ... Not used.
-##' @return Unsure.
+##' @return List containing summaries of lambda, (log) residual SDs, nu, latent mean, and (log) latent SD random effects.
 ##' @author Stephen R Martin
 ##' @importFrom nlme ranef
 ##' @export ranef
 ##' @export
 ##' @method ranef mires
+##' @aliases ranef
 ranef.mires <- function(object, prob = .95, ...) {
     group_name <- object$meta$group$name
 

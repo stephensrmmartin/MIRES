@@ -11,7 +11,7 @@ simulate_DP(N, K, param, alpha, f)
 
 \item{K}{Max cluster.}
 
-\item{param}{Data.frame of parameters corresponding to d and r distribution  functions.}
+\item{param}{Data.frame of parameters corresponding to d and r distribution  functions. (E.g., data.frame(mean = rnorm(50), sd = abs(rnorm(50, 0, .5))))}
 
 \item{alpha}{Numeric. The alpha parameter to the DP.}
 
@@ -22,9 +22,6 @@ List of data (y), weights (pi), params (param), and the true density function (d
 }
 \description{
 Generate Truncated Dirichlet Process Mixture.
-}
-\examples{
-y <- genMixture(1000, 50, data.frame(mean = rnorm(50), sd = abs(rnorm(50, 0, .5))), .4, "norm")
 }
 \author{
 Stephen Martin
