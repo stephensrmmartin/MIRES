@@ -47,6 +47,7 @@ mires <- function(formula,
                   save_scores = FALSE,
                   prior_only = FALSE,
                   prior = c(0, .25),
+                  post_process = TRUE, # REMOVE THIS AFTER TESTING
                   ...) {
     dots <- list(...)
 
@@ -109,6 +110,9 @@ mires <- function(formula,
 
     ## Select model
     stan_args$object <- stanmodels[["redifhm_all"]]
+    if(post_process) {
+        stan_args$object <- stanmodels[["redifhm_all_alt"]]
+    }
 
     ## Select params
     ### Shared params
