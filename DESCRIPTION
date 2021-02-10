@@ -1,5 +1,5 @@
 Package: MIRES
-Title: Measurement Invariance Assessment Using Random Effects Models and Hierarchical Inclusion Modeling
+Title: Measurement Invariance Assessment Using Random Effects Models and Shrinkage
 Version: 0.1.0
 Authors@R: 
     person(given = "Stephen",
