@@ -15,14 +15,19 @@ data {
   matrix[N, J] x; // Indicator values
 
   int<lower=0, upper = 1> prior_only; // Whether to sample from prior only.
+  int eta_cor_nonmi; // Not used for unidimensional.
+  real hmre_mu;
+  real<lower=0> hmre_scale;
 }
 
 transformed data {
   int total = 3*J;
-  int hm_item_index[total] = gen_item_indices(J);
-  int hm_param_index[total] = gen_param_indices(J);
+  /* int hm_item_index[total] = gen_item_indices(J); */
+  /* int hm_param_index[total] = gen_param_indices(J); */
   int lamResNu_indices[3, J] = gen_lamResNu_indices(J);
   vector[N*J] x_vector = to_vector(x);
+  real implied_ln_mu = 4 * hmre_mu;
+  real implied_ln_scale = 2 * hmre_scale; // LN-scale = sqrt(4 * hmre_scale^2)
 }
 
 parameters {
@@ -31,10 +36,10 @@ parameters {
   row_vector[J] nu;
   row_vector[J] resid_log;
 
-  // Random Effects
-  matrix[K, total] lambda_resid_nu_random_z; // 3J Vectors of uncor, std. REs.
-  cholesky_factor_corr[total] lambda_resid_nu_random_L; // Chol. factor of RE correlations
-  vector<lower=0>[total] lambda_resid_nu_random_sigma; // SD of REs
+  // Random Effects (Lambda, resid, nu, eta mean, eta logsd)
+  matrix[K, total] random_z; // 3J Vectors of uncor, std. REs.
+  cholesky_factor_corr[total] random_L; // Chol. factor of RE correlations
+  vector<lower=0>[total] random_sigma; // SD of REs
 
   // Latent
   vector[N] eta_z; // N-length vector of latent factor scores; std.
@@ -42,18 +47,19 @@ parameters {
   vector<lower=0>[K-1] eta_sd_s; // K-1 latent SDs; K-th is determined so that prod(eta_sd) = 1
 
   // Hierarchical Inclusion Model
-  real hm_tau;
-  vector[3] hm_param;
-  vector[J] hm_item;
-  vector[total] hm_lambda;
-  
+  /* real hm_tau; */
+  /* vector[3] hm_param; */
+  /* vector[J] hm_item; */
+  /* vector[total] hm_lambda; */
+  /* real<lower=0> hm_tau; // No dependence structure. hm_tau ~ LN(4*hmre_mu, 2*hmre_scale) */
+  vector<lower=0>[total] hm_lambda; // No dependence structure. hm_lambda ~ LN(4*hmre_mu, 2*hmre_scale); Still regularizes.
 }
 
 transformed parameters {
-  matrix[K, total] lambda_resid_nu_random = z_to_random(lambda_resid_nu_random_z, lambda_resid_nu_random_sigma, lambda_resid_nu_random_L);
-  matrix[K, J] lambda_random = lambda_resid_nu_random[, lamResNu_indices[1]];
-  matrix[K, J] resid_random = lambda_resid_nu_random[, lamResNu_indices[2]];
-  matrix[K, J] nu_random = lambda_resid_nu_random[, lamResNu_indices[3]];
+  matrix[K, total] random = z_to_random(random_z, random_sigma, random_L);
+  matrix[K, J] lambda_random = random[, lamResNu_indices[1]];
+  matrix[K, J] resid_random = random[, lamResNu_indices[2]];
+  matrix[K, J] nu_random = random[, lamResNu_indices[3]];
   row_vector[J] lambda_lowerbound = compute_lambda_lowerbounds(lambda_random);
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   vector[K] eta_mean = eta_means_stz(eta_mean_s);
@@ -63,7 +69,7 @@ transformed parameters {
 
 model {
   // Declarations
-  vector[total] hm_hat = exp(hm_tau + hm_param[hm_param_index] + hm_item[hm_item_index] + hm_lambda);
+  /* vector[total] hm_hat = exp(hm_tau + hm_param[hm_param_index] + hm_item[hm_item_index] + hm_lambda); */
   matrix[N, J] xhat = rep_matrix(nu, N) + eta*lambda; // Fixed effects
   matrix[N, J] s_loghat = rep_matrix(resid_log, N); // Fixed effects
   xhat += nu_random[group] + rep_matrix(eta, J) .* lambda_random[group];
@@ -80,20 +86,21 @@ model {
   resid_log ~ normal(0, 1);
   nu ~ normal(0, 1);
 
-  to_vector(lambda_resid_nu_random_z) ~ std_normal();
-  lambda_resid_nu_random_L ~ lkj_corr_cholesky(1);
+  to_vector(random_z) ~ std_normal();
+  random_L ~ lkj_corr_cholesky(1);
 
   eta_z ~ std_normal();
   eta_mean_s ~ std_normal();
   eta_sd_s ~ std_normal();
 
-  hm_tau ~ std_normal();
-  hm_param ~ std_normal();
-  hm_item ~ std_normal();
-  hm_lambda ~ std_normal();
+  /* hm_tau ~ normal(hmre_mu, hmre_scale); */
+  /* hm_param ~ normal(hmre_mu, hmre_scale); */
+  /* hm_item ~ normal(hmre_mu, hmre_scale); */
+  /* hm_lambda ~ normal(hmre_mu, hmre_scale); */
+  hm_lambda ~ lognormal(implied_ln_mu, implied_ln_scale);
 
   // Hierarchical inclusion
-  lambda_resid_nu_random_sigma ~ normal(0, hm_hat);
+  random_sigma ~ normal(0, hm_lambda);
 
 
   // Likelihood
@@ -105,5 +112,6 @@ model {
 
 
 generated quantities {
-  corr_matrix[total] RE_cor = L_to_cor(lambda_resid_nu_random_L);
+  /* corr_matrix[total] RE_cor = L_to_cor(random_L); */
+  matrix[total,total] RE_cor = L_to_cor(random_L);
 }

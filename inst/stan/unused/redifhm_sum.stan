@@ -1,5 +1,6 @@
 functions {
 #include /functions/common.stan
+#include /functions/sum_to_zero.stan
 #include /functions/ud.stan
   
 }
@@ -14,6 +15,9 @@ data {
   matrix[N, J] x; // Indicator values
 
   int<lower=0, upper = 1> prior_only; // Whether to sample from prior only.
+  int eta_cor_nonmi; // Not used for unidimensional.
+  real hmre_mu;
+  real<lower=0> hmre_scale;
 }
 
 transformed data {
@@ -30,14 +34,15 @@ parameters {
   row_vector[J] nu;
   row_vector[J] resid_log;
 
-  // Random Effects
-  matrix[K, total + 2] lambda_resid_nu_mean_logsd_random_z; // 3J Vectors of uncor, std. REs.
-  cholesky_factor_corr[total + 2] lambda_resid_nu_mean_logsd_random_L; // Chol. factor of RE correlations
-  // TODO: Try this with estimating the sigma for mean and logsd, like in the multi model.
-  vector<lower=0>[total] lambda_resid_nu_random_sigma; // SD of REs: TODO: Should sigma for mean and logsd be estimated, or set to 1? Currently, assuming eta_mean and log(eta_sd) ~ N(0,1)
+  // Random Effects (Lambda, resid, nu, eta mean, eta logsd)
+  matrix[K, total] random_z; // 3J Vectors of uncor, std. REs.
+  cholesky_factor_corr[total] random_L; // Chol. factor of RE correlations
+  vector<lower=0>[total] random_sigma; // SD of REs
 
   // Latent
   vector[N] eta_z; // N-length vector of latent factor scores; std.
+  vector[K-1] eta_mean_s;  // K-1 latent means; K-th is determined so that mean(eta_mean) = 0
+  vector<lower=0>[K-1] eta_sd_s; // K-1 latent SDs; K-th is determined so that prod(eta_sd) = 1
 
   // Hierarchical Inclusion Model
   real hm_tau;
@@ -48,15 +53,14 @@ parameters {
 }
 
 transformed parameters {
-  vector<lower=0>[total + 2] lambda_resid_nu_mean_logsd_random_sigma = append_row(lambda_resid_nu_random_sigma, [1.0, 1.0]');
-  matrix[K, total + 2] lambda_resid_nu_mean_logsd_random = z_to_random(lambda_resid_nu_mean_logsd_random_z, lambda_resid_nu_mean_logsd_random_sigma, lambda_resid_nu_mean_logsd_random_L);
-  matrix[K, J] lambda_random = lambda_resid_nu_mean_logsd_random[, lamResNu_indices[1]];
-  matrix[K, J] resid_random = lambda_resid_nu_mean_logsd_random[, lamResNu_indices[2]];
-  matrix[K, J] nu_random = lambda_resid_nu_mean_logsd_random[, lamResNu_indices[3]];
-  vector[K] eta_mean = 0 + lambda_resid_nu_mean_logsd_random[, total + 1];
-  vector[K] eta_sd = exp(lambda_resid_nu_mean_logsd_random[, total + 2]);
+  matrix[K, total] random = z_to_random(random_z, random_sigma, random_L);
+  matrix[K, J] lambda_random = random[, lamResNu_indices[1]];
+  matrix[K, J] resid_random = random[, lamResNu_indices[2]];
+  matrix[K, J] nu_random = random[, lamResNu_indices[3]];
   row_vector[J] lambda_lowerbound = compute_lambda_lowerbounds(lambda_random);
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
+  vector[K] eta_mean = eta_means_stz(eta_mean_s);
+  vector[K] eta_sd = eta_sds_pto(eta_sd_s);
   vector[N] eta = eta_mean[group] + eta_z .* eta_sd[group];
 }
 
@@ -79,18 +83,20 @@ model {
   resid_log ~ normal(0, 1);
   nu ~ normal(0, 1);
 
-  to_vector(lambda_resid_nu_mean_logsd_random_z) ~ std_normal();
-  lambda_resid_nu_mean_logsd_random_L ~ lkj_corr_cholesky(1);
+  to_vector(random_z) ~ std_normal();
+  random_L ~ lkj_corr_cholesky(1);
 
   eta_z ~ std_normal();
+  eta_mean_s ~ std_normal();
+  eta_sd_s ~ std_normal();
 
-  hm_tau ~ std_normal();
-  hm_param ~ std_normal();
-  hm_item ~ std_normal();
-  hm_lambda ~ std_normal();
+  hm_tau ~ normal(hmre_mu, hmre_scale);
+  hm_param ~ normal(hmre_mu, hmre_scale);
+  hm_item ~ normal(hmre_mu, hmre_scale);
+  hm_lambda ~ normal(hmre_mu, hmre_scale);
 
   // Hierarchical inclusion
-  lambda_resid_nu_random_sigma ~ normal(0, hm_hat);
+  random_sigma ~ normal(0, hm_hat);
 
 
   // Likelihood
@@ -102,5 +108,6 @@ model {
 
 
 generated quantities {
-  corr_matrix[total] RE_cor = L_to_cor(lambda_resid_nu_mean_logsd_random_L);
+  /* corr_matrix[total] RE_cor = L_to_cor(random_L); */
+  matrix[total,total] RE_cor = L_to_cor(random_L);
 }

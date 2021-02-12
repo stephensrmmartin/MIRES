@@ -23,7 +23,7 @@
     @return row_vector[J] lambda lower bounds.
    */
   row_vector compute_lambda_lowerbounds(matrix lambda_random){
-    int J = rows(lambda_random);
+    int J = cols(lambda_random);
     row_vector[J] lambda_lowerbound;
 
     for(j in 1:J) {
