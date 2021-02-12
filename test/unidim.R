@@ -2,43 +2,57 @@ library(rstan)
 library(MIRES)
 
 set.seed(14)
-## J <- 10
-## K <- 20
-## n <- 40
 J <- 8
-K <- 10
-n <- 100
+K <- 5
+n <- 50
 
 fixed <- list(lambda = rep(.7, J), resid_log = rep(log(sqrt(1 - .7^2)), J), nu = rep(0, J))
-mipattern <- list("none")
 etadist <- "std"
 
-## mipattern <- list("none")
+mipatterns <- list(
+    none = list("none"),
+    constant = list("constant", .3),
+    items = list("items", .3, J/2),
+    loadings = list("params", .3, 0),
+    resid = list("params", .3, 1),
+    nu = list("params", .3, 2)
+)
 
-d <- MIRES:::datagen_uni(J, K, n, fixed, mipattern, etadist = "std")
+datasets <- lapply(mipatterns, MIRES:::datagen_uni, J = J, K = K, n = n, etadist = etadist, fixed = fixed)
 
-ds <- d$df
+fits <- lapply(datasets, function(x) {
+    df <- x$df
+    fit <- mires(myFactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8, group, df, iter = 1000)
+    fit
+})
 
-fit_s_dep_marg <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8, group = group, ds,
-                       inclusion_model = "dep",
-                       identification = "sum",
-                       save_scores = FALSE,
-                       prior = c(0, .25), iter = 1000)
+fits_summaries <- lapply(fits, function(x) {
+    summary(x)
+})
 
-fit_s_ind_marg <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8, group = group, ds,
-                       inclusion_model = "indep",
-                       identification = "sum",
-                       save_scores = FALSE,
-                       prior = c(0, .25), iter = 1000)
+BF01s <- sapply(fits_summaries, function(x) {
+    x$summary$resd$BF01
+})
 
-fit_h_dep_marg <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8, group = group, ds,
-                       inclusion_model = "dep",
-                       identification = "hier",
-                       save_scores = FALSE,
-                       prior = c(0, .25), iter = 1000)
+BFsls <- sapply(fits_summaries, function(x) {
+    x$summary$resd$`BF(SD <= 0.1)`
+})
 
-fit_s_dep_cond <- mires(myLatent ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8, group = group, ds,
-                       inclusion_model = "dep",
-                       identification = "sum",
-                       save_scores = TRUE,
-                       prior = c(0, .25), iter = 1000)
+round(BF01s, 3)
+round(BFsls, 3)
+
+fits_ind <- lapply(datasets, function(x) {
+    df <- x$df
+    fit <- mires(myFactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8, group, df, inclusion_model = "ind", iter = 1000)
+    fit
+})
+
+fits_ind_summaries <- lapply(fits, summary)
+
+BF01s_ind <- sapply(fits_ind_summaries, function(x) {
+    x$summary$resd$BF01
+})
+
+BFsls_ind <- sapply(fits_ind_summaries, function(x) {
+    x$summary$resd$`BF(SD <= 0.1)`
+})
