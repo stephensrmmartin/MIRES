@@ -41,6 +41,10 @@
 ##' @import stats
 ##' @author Stephen R. Martin
 ##' @export
+##' @references
+##' Stan Development Team (2020). RStan: the R interface to Stan. R package version 2.21.1. https://mc-stan.org
+##'
+##' Martin, S. R., Williams, D. R., & Rast, P. (2019, June 18). Measurement Invariance Assessment with Bayesian Hierarchical Inclusion Modeling. doi:10.31234/osf.io/qbdjt
 mires <- function(formula,
                   group,
                   data,
