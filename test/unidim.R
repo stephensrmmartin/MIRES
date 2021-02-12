@@ -47,7 +47,7 @@ fits_ind <- lapply(datasets, function(x) {
     fit
 })
 
-fits_ind_summaries <- lapply(fits, summary)
+fits_ind_summaries <- lapply(fits_ind, summary)
 
 BF01s_ind <- sapply(fits_ind_summaries, function(x) {
     x$summary$resd$BF01
@@ -56,3 +56,45 @@ BF01s_ind <- sapply(fits_ind_summaries, function(x) {
 BFsls_ind <- sapply(fits_ind_summaries, function(x) {
     x$summary$resd$`BF(SD <= 0.1)`
 })
+
+round(BF01s_ind, 3)
+round(BFsls_ind, 3)
+
+plot(log(BF01s), log(BF01s_ind))
+abline(0,1)
+
+plot(log(BFsls), log(BFsls_ind))
+abline(0,1)
+
+
+# Get decisions based on BF 10
+
+bf01s_dec <- apply(BF01s, c(1,2), function(x) {
+    ifelse(x > 10, 0, ifelse(x < 1/10, 1, NA))
+})
+
+bf01s_ind_dec <- apply(BF01s_ind, c(1,2), function(x) {
+    ifelse(x > 10, 0, ifelse(x < 1/10, 1, NA))
+})
+
+# Get decisions based on BF threshold
+
+bf01s_dec <- apply(BFsls, c(1,2), function(x) {
+    ifelse(x > 10, 0, ifelse(x < 1/10, 1, NA))
+})
+
+bf01s_ind_dec <- apply(BFsls_ind, c(1,2), function(x) {
+    ifelse(x > 10, 0, ifelse(x < 1/10, 1, NA))
+})
+
+# Decision rate
+apply(bf01s_dec, 2, function(x){mean(!is.na(x))})
+apply(bf01s_ind_dec, 2, function(x){mean(!is.na(x))})
+
+# Assess decision-accuracy of these things.
+
+truth <- sapply(datasets, function(x){x$params$random_sigma})
+truth <- apply(truth, 1:2, function(x) {as.numeric(x > 0)})
+
+apply(truth == bf01s_dec, 2, function(x) {mean(x, na.rm = TRUE)})
+apply(truth == bf01s_ind_dec, 2, function(x) {mean(x, na.rm = TRUE)})
