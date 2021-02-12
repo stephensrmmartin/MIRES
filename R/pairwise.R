@@ -1,8 +1,10 @@
+##' Compute pairwise differences in group-specific measurement parameters.
+##' 
 ##' For a specified set of parameters, this computes all pairwise differences in the random effects across the posterior. Specifically, this computes the posterior differences of groups' parameters, for all parameters. This is useful for comparing groups' estimates under non-invariance.
 ##'
 ##' @title Pairwise comparisons of random parameters.
 ##' @param mires mires object.
-##' @param param Character. One of lambda (loadings), resid (residual standard deviation on the log scale), or nu (intercepts).
+##' @param param Character. One of \code{lambda} (loadings), \code{resid} (residual standard deviation on the log scale), or \code{nu} (intercepts).
 ##' @param prob Numeric (0-1). Probability mass contained within the highest density interval.
 ##' @param less_than Numeric (Default: .1; positive). Value at which to assess Pr(|difference| < less_than|D).
 ##' @param groups Character vector (Optional). If specified, will only compute pairwise differences of the specified groups.

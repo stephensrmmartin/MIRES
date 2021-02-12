@@ -1,4 +1,4 @@
-##' @title Extract random effects for each group from MIRES model.
+##' @title Extract random effects of each group from MIRES model.
 ##' @param object mires object.
 ##' @param prob Numeric (Default: .95). Amount of probability mass to contain within the credible interval.
 ##' @param ... Not used.
