@@ -29,6 +29,19 @@ print.mires <- function(x, ...) {
     invisible(x)
 }
 
+##' Computes summaries for MIRES objects.
+##'
+##' Computes summary tables for fixed measurement parameters (loadings, residual SDs, and intercepts) and random effect standard deviations (resd).
+##' The printed output includes the posterior mean, median, SD, and .95 (Default) highest density intervals.
+##' HDIs were chosen instead of quantile intervals because the random effect SDs can be on the boundary of zero if invariance is plausible.
+##' Additionally, other columns exist to help aid decisions about invariance:
+##' \describe{
+##'   \item{BF01}{Bayes factor of invariance (Variance = 0) to non-invariance (Variance > 0)}
+##'   \item{BF10}{Bayes factor of non-invariance (Variance > 0) to invariance (Variance = 0). The inverse of BF01 for convenience}
+##'   \item{Pr(SD <= \code{less_than})}{The posterior probability that the random effect SD is less than \code{less_than} (Default: .1). Set \code{less_than} to a value below which you would consider the variance to be effectively ignorable.}
+##'   \item{BF(SD <= \code{less_than})}{The Bayes Factor comparing effectively-invariant (SD < \code{less_than}) to non-invariant (SD > \code{less_than}). Set \code{less_than} to a value below which you would consider variance to be effectively ignorable. This uses the encompassing prior approach.}
+##' }
+##' 
 ##' @title Summary method for mires object.
 ##' @param object mires object.
 ##' @param prob Numeric (Default = .95). Probability mass to be contained in the highest posterior density interval.
