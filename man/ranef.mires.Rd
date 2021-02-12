@@ -3,7 +3,7 @@
 \name{ranef.mires}
 \alias{ranef.mires}
 \alias{ranef}
-\title{Extract random effects for each group from MIRES model.}
+\title{Extract random effects of each group from MIRES model.}
 \usage{
 \method{ranef}{mires}(object, prob = 0.95, ...)
 }
@@ -18,7 +18,7 @@
 List containing summaries of lambda, (log) residual SDs, nu, latent mean, and (log) latent SD random effects.
 }
 \description{
-Extract random effects for each group from MIRES model.
+Extract random effects of each group from MIRES model.
 }
 \author{
 Stephen R Martin

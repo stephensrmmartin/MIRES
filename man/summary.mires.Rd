@@ -11,12 +11,12 @@
 
 \item{prob}{Numeric (Default = .95). Probability mass to be contained in the highest posterior density interval.}
 
-\item{less_than}{Numeric (Default: .1; positive). Value at which to assess Pr(parameter < less_than|D).}
+\item{less_than}{Numeric (Default: .1; positive). Value at which to assess Pr(SD < less_than|D).}
 
 \item{...}{Not used.}
 }
 \value{
-summary.mires object. List of meta data and summary. Summary is list of summary tables for all non-random parameters.
+summary.mires object. List of meta data and summary. Summary is list of summary tables for all fixed effects parameters.
 }
 \description{
 Summary method for mires object.

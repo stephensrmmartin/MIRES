@@ -16,7 +16,7 @@ pairwise(
 \arguments{
 \item{mires}{mires object.}
 
-\item{param}{Character. One of lambda (loadings), resid (residual standard deviation on the log scale), or nu (intercepts).}
+\item{param}{Character. One of \code{lambda} (loadings), \code{resid} (residual standard deviation on the log scale), or \code{nu} (intercepts).}
 
 \item{prob}{Numeric (0-1). Probability mass contained within the highest density interval.}
 
@@ -30,6 +30,9 @@ pairwise(
 Data frame.
 }
 \description{
+Compute pairwise differences in group-specific measurement parameters.
+}
+\details{
 For a specified set of parameters, this computes all pairwise differences in the random effects across the posterior. Specifically, this computes the posterior differences of groups' parameters, for all parameters. This is useful for comparing groups' estimates under non-invariance.
 }
 \author{
