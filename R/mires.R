@@ -51,12 +51,12 @@
 ##' 
 ##' # Fit MIRES to simulated data example.
 ##' # Assume factor name is, e.g., agreeableness.
-##' # In practice, you should use more chains, more cores, and many more iterations (2000).
-##' # This is to save time.
+##' # NOTE: In practice, you should use more chains, more cores, and *many* more iterations (2000).
+##' # 'iter' is set to 10 purely for CRAN timing policy.
 ##' fit <- mires(agreeableness ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8,
 ##'              group = group,
 ##'              data = sim_loadings,
-##'              chains = 2, cores = 2, iter = 50)
+##'              chains = 2, cores = 2, iter = 10)
 ##'
 ##' # Summarize fit
 ##' summary(fit)
