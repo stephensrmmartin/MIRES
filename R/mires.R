@@ -16,7 +16,7 @@
 ##' The "Hierarchical inclusion model" on the random effect variance manifests as a hierarchical prior.
 ##' When a dependent inclusion model is specified, then the hierarchical prior on random effect SDs is:
 ##' \deqn{p(\sigma_p | \exp(\tau)) = \mathcal{N}^+(\sigma_p | 0, \exp(\tau))}
-##' \deqn{\tau = \tau_c + \tau_{\text{param}_p} + \tau_{\text{item}_p} + \tau_p}
+##' \deqn{\tau = \tau_c + \tau_{param} + \tau_{item} + \tau_p}
 ##' \deqn{\tau_* \sim \mathcal{N}(\mu_h, \sigma_h)}
 ##' Therefore, the regularization of each RE-SD is shared between all RE-SDs (tau_c), all RE-SDs of the same parameter type (tau_param), and all RE-SDs of the same item (tau_item).
 ##' 
