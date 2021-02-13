@@ -7,7 +7,7 @@ K <- 5
 n <- 50
 
 fixed <- list(lambda = rep(.7, J), resid_log = rep(log(sqrt(1 - .7^2)), J), nu = rep(0, J))
-etadist <- "std"
+etadist <- NULL
 
 mipatterns <- list(
     none = list("none"),
@@ -98,3 +98,4 @@ truth <- apply(truth, 1:2, function(x) {as.numeric(x > 0)})
 
 apply(truth == bf01s_dec, 2, function(x) {mean(x, na.rm = TRUE)})
 apply(truth == bf01s_ind_dec, 2, function(x) {mean(x, na.rm = TRUE)})
+
