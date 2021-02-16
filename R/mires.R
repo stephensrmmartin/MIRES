@@ -46,17 +46,15 @@
 ##'
 ##' Martin, S. R., Williams, D. R., & Rast, P. (2019, June 18). Measurement Invariance Assessment with Bayesian Hierarchical Inclusion Modeling. <doi:10.31234/osf.io/qbdjt>
 ##' @examples
+##' \dontrun{
 ##' data(sim_loadings) # Load simulated data set
 ##' head(sim_loadings) # 8 indicators, grouping variable is called "group"
 ##' 
 ##' # Fit MIRES to simulated data example.
 ##' # Assume factor name is, e.g., agreeableness.
-##' # NOTE: In practice, you should use more chains, more cores, and *many* more iterations (2000).
-##' # 'iter' is set to 10 purely for CRAN timing policy.
 ##' fit <- mires(agreeableness ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8,
 ##'              group = group,
-##'              data = sim_loadings,
-##'              chains = 2, cores = 2, iter = 50)
+##'              data = sim_loadings)
 ##'
 ##' # Summarize fit
 ##' summary(fit)
@@ -70,6 +68,7 @@
 ##' fit_ranefs <- ranef(fit)
 ##' # Look at random effects of loadings:
 ##' fit_ranefs$lambda
+##' }
 mires <- function(formula,
                   group,
                   data,
