@@ -23,7 +23,7 @@ Imports:
     methods,
     Rcpp (>= 0.12.0),
     rstan (>= 2.18.1),
-    rstantools (>= 2.0.0.9000),
+    rstantools (>= 2.0.0),
     Formula (>= 1.2-1),
     stats (>= 3.4.0),
     parallel (>= 3.4.0),
