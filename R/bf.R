@@ -18,7 +18,7 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
     }
 
     # Try logspline FIRST, and fix with DP if failed.
-    funs <- apply(samps, 2, dlogspline)
+    funs <- apply(samps, 2, dlogspline, error.action = 1)
 
     # Which failed?
     failed <- sapply(funs, function(x){!is.function(x)})
@@ -28,7 +28,7 @@ posterior_density_funs_sigmas <- function(mires, add_zero = TRUE, ...) {
     }
 
     # Recompute using HNormal DP
-    funs[failed] <- sapply(samps[, failed], ddirichletprocess_spike, ...)
+    funs[failed] <- sapply(as.data.frame(samps[, failed]), ddirichletprocess_spike, ...)
 
     return(funs)
 }

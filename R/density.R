@@ -65,7 +65,11 @@ dlogspline <- function(mcmc, lbound = 0, ...) {
     df <- function(x) {
         logspline::dlogspline(x, lso)
     }
-    return(df)
+    if(class(lso) == "logspline") {
+        return(df)
+    } else {
+        return(NA)
+    }
 }
 
 ##' @title Create dirichletprocess (exponential) based density function.
@@ -157,7 +161,7 @@ ddirichletprocess_spike <- function(mcmc, mode = "est", K = 200, spike_scale = .
                       K = K)
     stanOut <- rstan::vb(stanmodels[["dpHNormalSpike"]],
                          data = stan_data,
-                         importance_resampling = TRUE,
+                         importance_resampling = FALSE,
                          tol_rel_obj = dots$tol_rel_obj %IfNull% .005)
 
     pi_mix <- as.matrix(stanOut, pars = c("pi_mix"))
