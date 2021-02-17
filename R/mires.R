@@ -81,7 +81,7 @@ mires <- function(formula,
     dots <- list(...)
 
     # Get parsed data structures
-    d <- .parse_formula(formula, group, data)
+    d <- .parse_formula(formula, substitute(group), data)
 
     # Initialize Stan arguments
     stan_args <- list(data = d$stan_data,
@@ -186,7 +186,7 @@ mires <- function(formula,
     formList <- lapply(formList, as.Formula)
 
     # Get group
-    group <- substitute(group)
+    group <- group
     group_string <- deparse(group)
 
     # Get combined formula for model.frame
