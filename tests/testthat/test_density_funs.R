@@ -1,7 +1,7 @@
 
 test_that("posterior_density_funs_sigmas works as intended with sufficient MCMC samples", {
     
-          mcmc_samples <- matrix(abs(rnorm(5000)), ncol = 5)
+          mcmc_samples <- matrix(abs(rnorm(200)), ncol = 2)
           colnames(mcmc_samples) <- paste0("random_sigma", "[", 1:ncol(mcmc_samples),"]")
           test_obj <- list(fit = mcmc_samples)
           out <- posterior_density_funs_sigmas(test_obj)
