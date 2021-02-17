@@ -5,8 +5,8 @@ test_that("Model configurations change as expected.", {
     expect_s3_class(sim_loadings, "data.frame")
     form <- myFactor ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8
     iter <- 10
-    cores <- 2
-    chains <- 2
+    cores <- 1
+    chains <- 1
 
     config_matrix <- expand.grid(inclusion_model = c("dependent", "independent"),
                                  identification = c("sum_to_zero", "hierarchical"),
