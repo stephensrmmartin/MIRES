@@ -18,7 +18,8 @@ test_that("Model configurations change as expected.", {
                      data = ds,
                      iter = iter,
                      cores = cores,
-                     chains = chains)
+                     chains = chains,
+                     control = list(adapt_delta = .8))
         args <- c(args, config_matrix[x,])
 
         suppressWarnings((do.call(mires, args)))
@@ -36,7 +37,5 @@ test_that("Model configurations change as expected.", {
         # All should be multi = FALSE for now.
         expect_false(fits[[i]]$meta$multi)
         expect_false(fits[[i]]$meta$eta_cor_nonmi)
-
-        expect_invisible(print(fits[[i]]))
     }
 })
