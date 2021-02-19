@@ -54,7 +54,7 @@
 ##' # Assume factor name is, e.g., agreeableness.
 ##' fit <- mires(agreeableness ~ x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 + x_8,
 ##'              group = group,
-##'              data = sim_loadings)
+##'              data = sim_loadings, chains = 2, cores = 2)
 ##'
 ##' # Summarize fit
 ##' summary(fit)
