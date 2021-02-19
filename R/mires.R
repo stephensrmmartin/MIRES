@@ -46,7 +46,7 @@
 ##'
 ##' Martin, S. R., Williams, D. R., & Rast, P. (2019, June 18). Measurement Invariance Assessment with Bayesian Hierarchical Inclusion Modeling. <doi:10.31234/osf.io/qbdjt>
 ##' @examples
-##' \dontrun{
+##' \donttest{
 ##' data(sim_loadings) # Load simulated data set
 ##' head(sim_loadings) # 8 indicators, grouping variable is called "group"
 ##' 

@@ -68,7 +68,7 @@ In this case, RE-SDs cannot share regularization intensities between one another
 The inclusion model hyper parameters (mu_h, sigma_h) can be specified, but we recommend the default as a relatively sane, but weakly informative prior.
 }
 \examples{
-\dontrun{
+\donttest{
 data(sim_loadings) # Load simulated data set
 head(sim_loadings) # 8 indicators, grouping variable is called "group"
 
