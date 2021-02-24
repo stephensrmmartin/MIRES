@@ -28,6 +28,11 @@ You can install the development version of MIRES from [github](https://github.co
 remotes::install_github("stephenSRMMartin/MIRES")
 ```
 
+or from CRAN with:
+``` r
+install.packages("MIRES")
+```
+
 ## Example
 
 Simulated data are provided in the package.
