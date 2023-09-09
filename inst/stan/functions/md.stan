@@ -5,11 +5,11 @@
     Nus and sigmas constitute 2*J indices, but not loadings.
     Currently, loadings are organized in (row-major) order of lambdaEst.
    */
-  int[] gen_item_indices_md(int J, int F, int[] J_f, int[,] F_ind) {
+  array[] int gen_item_indices_md(int J, int F, array[] int J_f, array[,] int F_ind) {
     int total_lambda = sum(J_f);
-    int resid_nu[2*J];
-    int lambda[total_lambda];
-    int lambda_resid_nu[total_lambda + 2*J];
+    array[2*J] int resid_nu;
+    array[total_lambda] int lambda;
+    array[total_lambda + 2*J] int lambda_resid_nu;
 
     // Resid and nu
     int base = 0;
@@ -33,12 +33,12 @@
     return(lambda_resid_nu);
   }
 
-  int[] gen_param_indices_md(int J, int[] J_f) {
-    int resid[J] = rep_array(2, J);
-    int nu[J] = rep_array(3, J);
+  array[] int gen_param_indices_md(int J, array[] int J_f) {
+    array[J] int resid = rep_array(2, J);
+    array[J] int nu = rep_array(3, J);
     int lambda_total = sum(J_f);
-    int lambda[lambda_total] = rep_array(1, lambda_total);
-    int lambda_resid_nu[lambda_total + 2*J] = append_array(lambda, append_array(resid, nu));
+    array[lambda_total] int lambda = rep_array(1, lambda_total);
+    array[lambda_total + 2*J] int lambda_resid_nu = append_array(lambda, append_array(resid, nu));
 
     return(lambda_resid_nu);
   }
@@ -50,8 +50,8 @@
     [8, 12] // Resid locations are vec[8:12]
     [13, 17] // Nu locations are vec[13:27]
    */
-  int[,] gen_lamResNu_bounds(int J, int[] J_f){
-    int out[3, 2];
+  array[,] int gen_lamResNu_bounds(int J, array[] int J_f){
+    array[3, 2] int out;
     int lambda_total = sum(J_f);
     out[1] = {1, lambda_total};
     out[2] = {lambda_total + 1, lambda_total + J};
@@ -60,8 +60,8 @@
     return(out);
   }
 
-  matrix lambda_mat(int[] J_f, int[,] F_ind, row_vector lambdaEst) {
-    int F_J[2] = dims(F_ind);  
+  matrix lambda_mat(array[] int J_f, array[,] int F_ind, row_vector lambdaEst) {
+    array[2] int F_J = dims(F_ind);  
     int F = F_J[1];
     int J = F_J[2];
     int tot = sum(J_f);

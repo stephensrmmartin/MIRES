@@ -4,8 +4,8 @@
     1 = indicator 1
     J = indicator J
    */ 
-  int[] gen_item_indices(int J) {
-    int hm_item_index[3*J];
+  array[] int gen_item_indices(int J) {
+    array[3*J] int hm_item_index;
 
     int base = 0;
     for(j in 1:(3*J)) {
@@ -25,8 +25,8 @@
     2 = resid
     3 = nu
    */ 
-  int[] gen_param_indices(int J) {
-    int hm_param_index[3*J];
+  array[] int gen_param_indices(int J) {
+    array[3*J] int hm_param_index;
 
     int base = 1;
     for(j in 1:(3*J)) {
@@ -49,8 +49,8 @@
     Instead of using (1:J); ((J+1) : (J*2)); ((J*2 + 1):(J*3)), one can just do:
     lamResNu_indices[1], lamResNu_indices[2], lamResNu_indices[3]
    */
-  int[,] gen_lamResNu_indices(int J) {
-    int lamResNu_indices[3, J];
+  array[,] int gen_lamResNu_indices(int J) {
+    array[3, J] int lamResNu_indices;
 
     for(p in 1:3) {
       for (j in 1:J) {
