@@ -7,7 +7,7 @@
       E(Y_ik | k) = nu_k + E(eta_ik | k) * Lambda_k
       Cov(Y_ik | k) = Lambda'_k V(eta_ik | k) Lambda_k + diag(exp(2 * resid_log_k))
     */
-matrix[] marg_cov_uni(
+array[] matrix marg_cov_uni(
 		      row_vector lambda,
                       row_vector resid_log,
                       matrix lambda_random,
@@ -16,7 +16,7 @@ matrix[] marg_cov_uni(
 		 ) {
   int J = cols(lambda);
   int K = rows(lambda_random);
-  matrix[J,J] cov_out[K];
+  array[K] matrix[J,J] cov_out;
   matrix[K, J] lambda_k = (rep_matrix(lambda, K) + lambda_random) .* rep_matrix(eta_sd, J);
   matrix[K, J] resid_k = exp(2 * (rep_matrix(resid_log, K) + resid_random));
   for(k in 1:K) {
@@ -50,12 +50,12 @@ matrix marg_expect_uni(
   return(exp_out);
 }
 
-int[,] sort_data_by_group_indices(int[] group) {
+array[,] int sort_data_by_group_indices(array[] int group) {
   int K = max(group);
   int N = num_elements(group);
-  int group_sorted[N] = sort_asc(group);
-  int out[K,2];
-  int n_k[K] = rep_array(0, K);
+  array[N] int group_sorted = sort_asc(group);
+  array[K,2] int out;
+  array[K] int n_k = rep_array(0, K);
   int index = 1;
   for(n in 1:N) { // Count observations of each group.
     n_k[group[n]] += 1;
@@ -68,13 +68,13 @@ int[,] sort_data_by_group_indices(int[] group) {
   return(out);
 }
 
-row_vector[] sort_data_by_group(matrix x, int[] group) {
+array[] row_vector sort_data_by_group(matrix x, array[] int group) {
   int K = max(group);
   int N = rows(x);
   int J = cols(x);
-  row_vector[J] out[N];
+  array[N] row_vector[J] out;
   /* matrix[N, J] out; */
-  int group_ordered[N] = sort_indices_asc(group);
+  array[N] int group_ordered = sort_indices_asc(group);
 
   /* int index = 1; */
   /* for(k in 1:K) { */

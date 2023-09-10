@@ -10,7 +10,7 @@ data {
   int J; // Total number of indicators
   int K; // Number of groups
 
-  int group[N]; // Group indicator array
+  array[N] int group; // Group indicator array
 
   matrix[N, J] x; // Indicator values
 
@@ -22,9 +22,9 @@ data {
 
 transformed data {
   int total = 3*J;
-  /* int hm_item_index[total] = gen_item_indices(J); */
-  /* int hm_param_index[total] = gen_param_indices(J); */
-  int lamResNu_indices[3, J] = gen_lamResNu_indices(J);
+  /* array[total] int hm_item_index = gen_item_indices(J); */
+  /* array[total] int hm_param_index = gen_param_indices(J); */
+  array[3, J] int lamResNu_indices = gen_lamResNu_indices(J);
   vector[N*J] x_vector = to_vector(x);
   real implied_ln_mu = 4 * hmre_mu;
   real implied_ln_scale = 2 * hmre_scale; // LN-scale = sqrt(4 * hmre_scale^2)

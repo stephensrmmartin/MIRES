@@ -9,7 +9,7 @@ data {
   int J; // Total number of indicators
   int K; // Number of groups
 
-  int group[N]; // Group indicator array
+  array[N] int group; // Group indicator array
 
   matrix[N, J] x; // Indicator values
 
@@ -21,14 +21,14 @@ data {
 
 transformed data {
   int total = 3*J;
-  int hm_item_index[total] = gen_item_indices(J);
-  int hm_param_index[total] = gen_param_indices(J);
-  int lamResNu_indices[3, J] = gen_lamResNu_indices(J);
+  array[total] int hm_item_index = gen_item_indices(J);
+  array[total] int hm_param_index = gen_param_indices(J);
+  array[3, J] int lamResNu_indices = gen_lamResNu_indices(J);
   /* vector[N*J] x_vector = to_vector(x); */
   // Sort data
   /* matrix[N, J] x_sorted; */
-  row_vector[J] x_sorted[N];
-  int n_k[K] = rep_array(0, K);
+  array[N] row_vector[J] x_sorted;
+  array[K] int n_k = rep_array(0, K);
   for(n in 1:N) {
     n_k[group[n]] += 1;
   }
@@ -82,7 +82,7 @@ transformed parameters {
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   /* vector[N] eta = eta_mean[group] + eta_z .* eta_sd[group]; */
   matrix[K, J] multi_normal_mu = marg_expect_uni(lambda, nu, lambda_random, nu_random, eta_mean);
-  matrix[J, J] multi_normal_sigma[K] = marg_cov_uni(lambda, resid_log, lambda_random, resid_random, eta_sd);
+  array[K] matrix[J, J] multi_normal_sigma = marg_cov_uni(lambda, resid_log, lambda_random, resid_random, eta_sd);
 }
 
 model {

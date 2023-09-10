@@ -10,12 +10,12 @@ data {
   int K; // Number of groups
   int F; // Number of latent factors
 
-  int group[N]; // Group indicator array
+  array[N] int group; // Group indicator array
 
   matrix[N, J] x; // Indicator values
 
-  int J_f[F]; // Number of indicators per factor
-  int F_ind[F, J]; // Which indicators for each factor.
+  array[F] int J_f; // Number of indicators per factor
+  array[F, J] int F_ind; // Which indicators for each factor.
 
   // Options
   int<lower=0, upper=1> prior_only; // Whether to sample from prior only.
@@ -29,9 +29,9 @@ transformed data {
   int total_lambda = sum(J_f);
   int total_param = total_lambda + 2*J;
 
-  int hm_item_index[total_param] = gen_item_indices_md(J, F, J_f, F_ind);
-  int hm_param_index[total_param] = gen_param_indices_md(J, J_f);
-  int lamResNu_bounds[3, 2] = gen_lamResNu_bounds(J, J_f);
+  array[total_param] int hm_item_index = gen_item_indices_md(J, F, J_f, F_ind);
+  array[total_param] int hm_param_index = gen_param_indices_md(J, J_f);
+  array[3, 2] int lamResNu_bounds = gen_lamResNu_bounds(J, J_f);
 
   vector[N*J] x_vector = to_vector(x);
 }
@@ -52,7 +52,7 @@ parameters {
   matrix[N, F] eta_z; // NxF matrix of latent factor scores.
   cholesky_factor_corr[F] eta_L_fixed; // Latent factor correlations
   // If not invariant, define:
-  cholesky_factor_corr[F] eta_L_random[K * eta_cor_nonmi];
+  array[K * eta_cor_nonmi] cholesky_factor_corr[F] eta_L_random;
   vector<lower=0, upper = 1>[eta_cor_nonmi] eta_L_random_weight;
 
 
@@ -75,12 +75,12 @@ transformed parameters {
   matrix[K, J] nu_random = random[, lamResNu_bounds[3,1]:lamResNu_bounds[3,2]];
   matrix[K, F] eta_mean = random[, (lamResNu_bounds[3,2] + 1):(lamResNu_bounds[3,2] + F)];
   matrix[K, F] eta_sd = exp(random[, (total_param + F + 1):(total_param + 2*F)]);
-  matrix[2*F, 2*F] eta_cov_U[K];
+  array[K] matrix[2*F, 2*F] eta_cov_U;
   matrix[N, F] eta = eta_mean[group]; // Initialize to means; eta = 0 + mean + stoch. error
   row_vector[total_lambda] lambda_lowerbound = compute_lambda_lowerbounds(lambda_est_random);
   row_vector[total_lambda] lambda_est = exp(lambda_log_est) + lambda_lowerbound;
   matrix[F, J] lambda = lambda_mat(J_f, F_ind, lambda_est);
-  matrix[F, J] lambda_random[K];
+  array[K] matrix[F, J] lambda_random;
 
   // Compute stochastic latent errors
   for(k in 1:K) { // Compute upper-triangular cholesky-covariance for each group.
