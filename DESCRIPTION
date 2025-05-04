@@ -1,6 +1,6 @@
 Package: MIRES
 Title: Measurement Invariance Assessment Using Random Effects Models and Shrinkage
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person(given = "Stephen",
            family = "Martin",
@@ -42,7 +42,7 @@ LinkingTo:
     rstan (>= 2.26.0),
     StanHeaders (>= 2.26.0)
 SystemRequirements: GNU make
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.2
 BugReports: https://github.com/stephenSRMMartin/MIRES/issues
 Suggests: 
     testthat
