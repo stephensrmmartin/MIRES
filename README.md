@@ -5,7 +5,7 @@
 <!-- badges: end -->
 
 MIRES is a package for *M*easurement *I*nvariance assessment using *R*andom *E*ffects and *S*hrinkage.
-This is the official implementation of the approach taken in [Measurement Invariance Assessment with Bayesian Hierarchical Inclusion Modeling](https://psyarxiv.com/qbdjt/).
+This is the official implementation of the approach taken in [Measurement Invariance Assessment with Bayesian Hierarchical Inclusion Modeling](https://osf.io/preprints/psyarxiv/qbdjt_v1).
 
 Unlike most other MI assessment methods, MIRES assumes all measurement parameters (loadings, intercepts, and residual SDs) can randomly vary across groups.
 Therefore, it is a fully mixed effects CFA model.

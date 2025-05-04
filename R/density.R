@@ -65,7 +65,7 @@ dlogspline <- function(mcmc, lbound = 0, ...) {
     df <- function(x) {
         logspline::dlogspline(x, lso)
     }
-    if(class(lso) == "logspline") {
+    if(is(lso, "logspline")) {
         return(df)
     } else {
         return(NA)
