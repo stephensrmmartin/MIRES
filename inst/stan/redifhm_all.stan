@@ -11,7 +11,7 @@ data {
   int J; // Total number of indicators (Cols)
   int K; // Number of groups
 
-  int group[N]; // Group indicator array
+  array[N] int group; // Group indicator array
 
   matrix[N, J] x; // Indicator values
 
@@ -31,14 +31,14 @@ data {
 
 transformed data {
   int total = 3 * J; // Number of random measurement model effects (Not including latent mu/sd)
-  int hm_item_index[total] = gen_item_indices(J);
-  int hm_param_index[total] = gen_param_indices(J);
-  int lamResNu_indices[3, J] = gen_lamResNu_indices(J);
+  array[total] int hm_item_index = gen_item_indices(J);
+  array[total] int hm_param_index = gen_param_indices(J);
+  array[3, J] int lamResNu_indices = gen_lamResNu_indices(J);
   int save_scores = 1 - marginalize; // Inverse boolean for easy reading
   int hier_coding = 1 - sum_coding; // Inverse boolean for easy reading
   vector[N * J] x_vector;
-  row_vector[J] x_sorted[N];
-  int x_sorted_indices[K,2];
+  array[N] row_vector[J] x_sorted;
+  array[K,2] int x_sorted_indices;
 
   // Optimizations
   if(save_scores) { // Vectorize input data in col-major order. x_vector ~ N(to_vector(xhat), to_vector(shat)).
@@ -90,7 +90,7 @@ transformed parameters {
   row_vector[J] lambda = exp(lambda_log) + lambda_lowerbound;
   vector[N * save_scores] eta; // Declare
   matrix[K * marginalize, J * marginalize] multi_normal_mu;
-  matrix[J * marginalize, J * marginalize] multi_normal_sigma[K * marginalize];
+  array[K * marginalize] matrix[J * marginalize, J * marginalize] multi_normal_sigma;
 
   if(save_scores) { // Compute latent score.
     eta = eta_mean[group] + eta_z .* eta_sd[group];
